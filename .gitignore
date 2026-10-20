@@ -8,3 +8,11 @@ node_modules/
 /playwright/.auth/
 .env
 .playwright-mcp/
+.env.*
+!.env.example
+dist/
+build/
+coverage/
+*.log
+frontend-reports/qa/node_modules/
+frontend-reports/qa/out/
