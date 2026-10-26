@@ -56,10 +56,8 @@ function renderRoute({ focus = false } = {}) {
         ? document.querySelector("#about-title")
         : homePage.querySelector("h1");
     requestAnimationFrame(() => {
-      if (route === "about") {
-        heading.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
-      }
-      heading.focus({ preventScroll: route !== "about" });
+      heading.scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+      heading.focus({ preventScroll: true });
     });
   } else if (hash === "#about") {
     requestAnimationFrame(() => document.querySelector("#about-title")?.scrollIntoView());
