@@ -1844,7 +1844,7 @@ input {
   font-weight: 400;
 }
 
-.preview-v2 .operation-card > p:not(.mono-label) {
+.preview-v2 .operation-card > :where(p:not(.mono-label)) {
   grid-row: 1;
   grid-column: 3;
 }
