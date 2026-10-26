@@ -16,3 +16,32 @@ coverage/
 *.log
 frontend-reports/qa/node_modules/
 frontend-reports/qa/out/
+
+# dependencies and generated output
+node_modules/
+playwright-report/
+test-results/
+dist/
+build/
+coverage/
+*.log
+
+# QA toolbox (the workflow's own rule 2.6)
+frontend-reports/qa/node_modules/
+frontend-reports/qa/out/
+
+# secrets (keep the example file)
+.env
+.env.*
+!.env.example
+
+# per-run screenshots, which are large and site-specific
+frontend-reports/screenshots/
+
+# installed third-party skills (see note below)
+.agents/skills/
+.claude/skills/
+
+# OS and editor junk
+.DS_Store
+Thumbs.db

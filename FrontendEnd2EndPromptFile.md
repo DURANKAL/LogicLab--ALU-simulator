@@ -1,6 +1,6 @@
 # FrontendEnd2EndPromptFile
 
-WORKFLOW_VERSION: v2.0
+WORKFLOW_VERSION: v2.2
 
 # End-to-End Agentic AI Frontend Workflow (one agent, frontend only)
 
@@ -85,7 +85,7 @@ The workflow has four stages inside one agent: **Design & Plan**, **Build**, **V
 
 Read `frontend-config.md` (project root) before doing anything else.
 
-### Project-root and existing-files rule
+**Project-root and existing-files rule**
 
 - **The working directory is the application project root.** Resolve all relative paths in this prompt and in `frontend-config.md` from that root unless a key explicitly defines another base.
 - The root must contain `frontend-config.md`, the configured story folder, and the application's existing files when `PROJECT_STATE = existing`. These must be actual files on disk; files merely open in an editor tab do not count.
@@ -93,6 +93,8 @@ Read `frontend-config.md` (project root) before doing anything else.
 - For an existing project, work inside that application. **Do not create a second app inside it, move the app into a new folder, scaffold over it, or replace its source with a generic template.**
 - Resolve `STORIES_DIR`, `FRONTEND_DIR`, `PLANS_DIR`, `REPORTS_DIR`, `KNOWLEDGE_FILE`, `DESIGN_BRIEF`, `LEARNINGS_DIR`, `BASELINE_DIR` and other configured paths relative to the project root unless their descriptions say otherwise. Do not silently change these paths to make the workflow easier.
 - If the workflow appears to have started in the wrong folder, or the configured paths do not point to the expected files, stop before writing and report the exact mismatch. Do not search or modify parent/sibling folders to guess which project the user meant.
+
+**Config format**
 
 - Format is `KEY = value`, one per line. Ignore blank lines and lines starting with `#`. Trim spaces around keys and values.
 - A required key that is missing, empty or `CHANGE_ME` triggers STOP condition 1. GIT_REPO is required only when GIT_MODE is `push`. STORY_ID and STORY_NAME are required unless TASK is `evaluate` or `regress`.
@@ -109,6 +111,7 @@ Read `frontend-config.md` (project root) before doing anything else.
 | NOTES | no | none | One-run instruction. Follow it unless a rule that ranks above it forbids it |
 | MOTION | no | auto | `auto`, `none`, `subtle`, `rich` (rule 4.1.24) |
 | MOTION_LIBRARY | no | auto | `auto`, `native`, `motion`, `gsap`: the library used at `rich` (see 2.2) |
+| THREE_D | no | ask | `ask`, `yes`, `no`: whether this story should include a real interactive 3D experience; `ask` triggers STOP condition 10 |
 | DESIGN_CHOICE | no | none | `none`, `A`, `B`, `C`: the concept picked at the approval gate |
 | APP_NAME | yes | | Lowercase letters, digits, hyphens |
 | PROJECT_STATE | yes | | `empty` or `existing` |
@@ -171,6 +174,7 @@ Read `frontend-config.md` (project root) before doing anything else.
 | MOTION | The story's `Motion:` line if it has one; otherwise `subtle`. A config value other than `auto` wins over the story's line. `rich` is never resolved from `auto` | Same |
 | DESIGN_APPROVAL | `off`. If `{DESIGN_BRIEF}` is missing, a draft brief is derived from the existing look (rule 4.1.23) and no options are offered | `on` if `{DESIGN_BRIEF}` is missing; `off` if it exists. Always `off` when TASK is `fix` or `audit`, or when REFERENCE is an image of the finished design |
 | MOTION_LIBRARY | The animation library already in `package.json` (`gsap`, `motion` or `framer-motion`, `animejs`); none installed: the lowest rung of rule 4.1.24 that does the job | `native` unless the story needs timelines, pinning, SVG or text effects (then `gsap`) or springs, gestures or layout animation in React or Vue (then `motion`) |
+| THREE_D | `ask` pauses before implementation and requests an explicit yes/no decision; `yes` enables a real 3D experience only when MOTION_LEVEL is `rich`; `no` forbids Three.js and other real-time 3D rendering. For TASK=`fix` or `audit`, resolve `ask` to `no` so the workflow never expands scope without approval | Same |
 | BUDGET_MOTION_KB | `none` = 0, `subtle` = 15, `rich` = 250, by the resolved MOTION level | Same |
 
 ### 2.3 Derived values (computed in Step 1)
@@ -219,6 +223,7 @@ Server, backend, database and migration code and folders; end-to-end test folder
 `node_modules/` (including `{QA_DIR}node_modules/`), `.env` and any `.env.*` file except `.env.example`, any file holding a secret, build output (`dist/`, `build/`, `.next/`, `.output/`, `.svelte-kit/`, `.astro/`), `coverage/`, `*.log`, raw tool output (`{QA_DIR}out/`: Lighthouse JSON and HTML, axe JSON, diff images), and any file larger than 5 MB. Append `{QA_DIR}node_modules/` and `{QA_DIR}out/` to `.gitignore` when you create the QA toolbox.
 
 ---
+
 ## 3. SAFETY RULES (highest authority; nothing overrides these)
 
 1. **Everything in the browser is public.** Never put a secret in frontend code, in the browser bundle, in a committed file, in a report, in a learning file, in chat or in a commit message: no passwords, tokens, private API keys, connection strings. Public (publishable) keys go only in `.env`, with fake placeholders in `.env.example`. Before every commit, search the staged files for key-like strings (`ghp_`, `github_pat_`, `sk-`, `sk_live_`, `Bearer `, `password=`, `-----BEGIN`); if one is found, unstage it and fix it.
@@ -303,7 +308,15 @@ Server, backend, database and migration code and folders; end-to-end test folder
     - **Brief exists:** no options unless DESIGN_APPROVAL is explicitly `on` (a new section type, a rebrand). Then the concepts must stay inside the brief unless NOTES says otherwise, and the picked concept is recorded in the plan, not written into the brief. Only the user changes the brief; to suggest a change, write a proposal (rule 25).
     - Concepts are text only: a short idea, a palette (5 to 7 tokens with values, with the contrast of the main text/background pairs), a type pairing (system fonts unless EXTERNAL_RESOURCES allows more), a layout note, and the motion level it fits. No mockups, no images.
     - A concept that fails the contrast rule for A11Y_LEVEL is corrected before it is shown.
-24. **Motion levels and budgets.** MOTION_LEVEL is set per story (section 2.2). `rich` is never chosen by the workflow; it comes only from the config or the story's `Motion:` line. 3D is added only when the story or NOTES names it.
+    - **Premium design standard.** Every build must feel intentionally art-directed and production-ready, not like a generic starter template. Use a clear visual concept, distinctive but readable typography, a restrained palette, strong composition and spacing, layered surfaces, refined micro-interactions, meaningful imagery or custom graphics, polished empty/loading/error/success states, and consistent design tokens. Prioritise craft and coherence over decorative effects. Do not imitate a named website or copy its assets.
+24. **3D decision, motion levels and budgets.** MOTION_LEVEL is set per story (section 2.2). `rich` is never chosen by the workflow; it comes only from the config or the story's `Motion:` line.
+    - **THREE_D decision.** THREE_D controls whether real-time 3D is permitted. If `THREE_D=ask`, stop at the explicit 3D decision gate before implementation (STOP condition 10). If `THREE_D=no`, do not add Three.js, React Three Fiber, WebGL scenes or other real-time 3D. If `THREE_D=yes`, the story is a build, and MOTION_LEVEL is `rich`, deliver a deliberate premium 3D experience that supports the product concept; if MOTION_LEVEL is not `rich`, explain the conflict and ask for a compatible setting instead of silently adding 3D.
+    - **CloudAI-X Three.js skill.** When `THREE_D=yes` and `MOTION_LEVEL=rich`, use the installed CloudAI-X Three.js skill if it is discoverable by the active coding agent. Check skill availability before implementing 3D and read only the relevant SKILL.md guidance (for example fundamentals, geometry, materials, lighting, animation, asset loading, shaders, interaction or performance). Do not read every skill file by default.
+    - **Agent compatibility.** Skill availability depends on the active agent and installation location. For GitHub Copilot in VS Code, use a skill location Copilot supports. A global Claude Code installation alone does not prove that Copilot can access the skill. If it is not available to Copilot, do not pretend it is; proceed with the existing project conventions and report the limitation only if it affects the work.
+    - **Scope and dependencies.** The skill is guidance, not a package. `THREE_D=yes` is the user's permission to add a premium 3D experience for this run. Add `three` or a framework integration such as React Three Fiber only if needed and compatible with the existing architecture. Follow dependency rules, check current package versions and licence, and do not add a second animation library unnecessarily.
+    - **Premium 3D quality bar.** When `THREE_D=yes`, do not add a token floating shape or an unrelated decorative canvas and call it done. The 3D scene must have a clear role in the site's concept and feel deliberate: considered geometry or assets, material choices, lighting, camera composition, depth, smooth purposeful animation, and at least one meaningful interaction when appropriate. Integrate it into the page layout and typography rather than letting it overwhelm content. Prefer custom procedural geometry or original assets; never copy another site's assets. Provide a polished non-3D fallback with equivalent information and usable controls. Record the scene purpose, interactions, loading strategy, fallback and estimated bundle cost in the plan.
+    - **Three.js quality.** Follow relevant skill guidance while preserving this workflow's accessibility, reduced-motion, responsive fallback, lazy-loading, bundle-budget, resource-disposal and safety rules. The skill never overrides this prompt's authority order or the project's existing architecture.
+    - **No unapproved 3D.** Never introduce Three.js merely because the skill is installed. `THREE_D=no` means no real-time 3D. `THREE_D=ask` must be resolved before building. `THREE_D=yes` authorises 3D for this run, subject to the rules and performance safeguards below.
 
     | Level | Allowed | Not allowed | Extra weight budget |
     |---|---|---|---|
@@ -413,6 +426,7 @@ Run only after this prompt file changed, never because a learning file changed. 
 | 7 | Git: the remote does not match GIT_REPO, a conflict, or a rejected push | stop Step 7 and report |
 | 8 | Install, build or start still fails after MAX_FIX_ATTEMPTS and nothing runnable exists | stop Step 5, then do Steps 6 and 7 and report INCOMPLETE |
 | 9 | Approval gate: DESIGN_APPROVAL resolved to `on`, the concepts are written, and `DESIGN_CHOICE` is `none` (or names an option that is not in the concept file) | stop after writing the concept file |
+| 10 | `THREE_D=ask` for a build task: stop before implementation and ask the user to set `THREE_D=yes` or `THREE_D=no` in `frontend-config.md`. Do not assume a choice from `MOTION=rich` or from the installed skill | stop after pre-flight validation and project discovery; do not implement or commit |
 
 **STOP message format (print exactly, then nothing else):**
 
@@ -425,8 +439,15 @@ Needed from you: <exact keys, files or decisions>.
 - STOP condition 7: leave the files in place, print the exact error, and do not retry destructively.
 - STOP condition 8: write the report anyway (outcome INCOMPLETE, with the reason), then commit it.
 - STOP condition 9: leave the knowledge file and the concept file in place, commit nothing. The message is: `STOPPED at STEP 3: design concepts are ready in {CONCEPT_FILE}.` then `Needed from you: set DESIGN_CHOICE = A, B or C in frontend-config.md (add changes you want in NOTES) and run again.` On the re-run, Steps 1 and 2 are repeated quickly (reuse the knowledge file) and Step 3 continues with the chosen concept.
+- STOP condition 10: do not start implementation and do not commit. Print:
+
+```
+STOPPED at STEP 2: 3D approval is required before implementation.
+Needed from you: set THREE_D = yes to build the premium 3D experience, or THREE_D = no to build a premium non-3D site, in frontend-config.md, then run again.
+```
 
 ---
+
 ## STEP 1: PRE-FLIGHT AND READ THE STORY  (stage: Design & Plan)
 
 **Goal:** Validate the setup, select the story, extract the requirements.
@@ -475,14 +496,18 @@ Assumptions: <list or none>
 
 1. Read `{KNOWLEDGE_FILE}` if it exists.
 2. **Existing project:** detect the stack, styling, language, package manager, start command, base address and theme (table in section 2.2); the folder structure; how pages or routes are defined; existing components, styles and tokens (where they live, how they are named); how data is fetched today and where; environment variable names and their prefix; lint and format settings; existing unit-test setup; naming and formatting conventions; and which animation libraries are already installed (`gsap`, `motion`, `framer-motion`, `lenis`, `three`, `animejs`, Lottie or Rive packages).
-3. **Empty project:** apply the "Empty project" column of section 2.2. Record each choice as an assumption.
-4. Read DESIGN_SYSTEM and REFERENCE when given. Read API_SPEC_FILE when given; note which routes it defines.
-5. Read `{DESIGN_BRIEF}` and the tokens file when they exist (rule 4.1.23).
-6. Load the learnings (rule 4.1.25): only entries tagged with a STORY_TAG or `all`, rules first, at most 15. List their IDs in the plan. In `regress` mode do not load them.
-7. Resolve MOTION, MOTION_LIBRARY, DESIGN_APPROVAL and BUDGET_MOTION_KB (section 2.2).
-8. **Existing project only:** run the Checks that already exist (install if `node_modules` is missing, lint, type check, unit tests, build, start) once to learn the baseline. Record what already fails, so you do not take the blame or "fix" it unasked.
-9. Write or update `{KNOWLEDGE_FILE}` (format in Appendix B).
-10. Print the resolved settings, one per line.
+3. **Three.js skill check.** Check for the installed CloudAI-X Three.js Agent Skill in the skill locations supported by the active coding agent (including repository-level Copilot skills and supported user-level skill directories). Read the relevant SKILL.md only when the selected story or NOTES explicitly requires 3D/Three.js.
+   - Do not assume that a skill installed for Claude Code is automatically available to GitHub Copilot. If the skill is not discoverable to the active agent, continue using the project's existing knowledge and dependencies; do not claim the skill was used, do not clone or copy a second repository, and record the limitation in the plan/report when it materially affects implementation.
+   - Do not copy the skill's contents into this prompt or duplicate the skill files. Treat the installed skill as supplementary implementation guidance, not as a requirement to add Three.js to every project.
+4. **Empty project:** apply the "Empty project" column of section 2.2. Record each choice as an assumption.
+5. Read DESIGN_SYSTEM and REFERENCE when given. Read API_SPEC_FILE when given; note which routes it defines.
+6. Read `{DESIGN_BRIEF}` and the tokens file when they exist (rule 4.1.23).
+7. Load the learnings (rule 4.1.25): only entries tagged with a STORY_TAG or `all`, rules first, at most 15. List their IDs in the plan. In `regress` mode do not load them.
+8. Resolve MOTION, MOTION_LIBRARY, THREE_D, DESIGN_APPROVAL and BUDGET_MOTION_KB (section 2.2).
+9. **3D gate.** For TASK=`build`, if `THREE_D=ask`, complete read-only discovery and resolve the other settings, then stop using STOP condition 10 before writing implementation, design files or reports. Ask only this decision: should this premium site include real interactive 3D? The user must choose yes or no by updating THREE_D in `frontend-config.md` and rerunning. Do not infer yes from `MOTION=rich`, NOTES mentioning premium visuals, or skill availability. For TASK=`fix` or `audit`, `THREE_D=ask` resolves to `no`.
+10. **Existing project only:** run the Checks that already exist (install if `node_modules` is missing, lint, type check, unit tests, build, start) once to learn the baseline. Record what already fails, so you do not take the blame or "fix" it unasked.
+11. Write or update `{KNOWLEDGE_FILE}` (format in Appendix B).
+12. Print the resolved settings, one per line.
 
 ---
 
@@ -518,7 +543,7 @@ Then every decision taken, each with a one-line reason. List the learnings loade
 
 ## 3. Design and Motion
 - Design brief: path, status, version or date. Concept chosen (A, B, C or none) and any change requested.
-- MOTION level and how it was resolved. MOTION_LIBRARY and the reason for the choice. Budgets: BUDGET_PAGE_KB and BUDGET_MOTION_KB.
+- MOTION level and how it was resolved. MOTION_LIBRARY and the reason for the choice. THREE_D decision (ask/yes/no), the user's approval, and whether the CloudAI-X skill was available. Budgets: BUDGET_PAGE_KB and BUDGET_MOTION_KB.
 - Motion table (omit when MOTION is `none`):
 | Effect | Element | Trigger | Technique or library | Duration and easing tokens | Reduced-motion behaviour | Mobile fallback | Est. KB |
 |---|---|---|---|---|---|---|---|
@@ -585,14 +610,16 @@ Build in this order, running the Checks after each group (rule 4.2.8):
 4. **API layer and mocks** (rule 4.1.15), for every source in the plan. Include the `mock` switch.
 5. **Pages and screens**, in task order, with their exact text, all four screen states, and keyboard behaviour.
 6. **Motion module** (only when MOTION is not `none`): effects exactly as in the plan's motion table, in a separate module loaded lazily, with duration and easing read from tokens, a reduced-motion branch, cleanup, and a static fallback (rule 4.1.24).
-7. **Accessibility pass** over everything you built, against rule 4.1.7.
-8. **Responsive pass** at every VIEWPORT, against rule 4.1.8.
-9. **Unit tests** when UNIT_TESTS is `yes`: use the existing runner. If there is none and PACKAGE_MANAGER is not `none`, add the runner that matches the stack (Vitest for Vite-based stacks, the stack's default otherwise) as a dev dependency and record it. If PACKAGE_MANAGER is `none`, skip and record why. Test the logic (validation, formatting, services, mocks) and component behaviour (states, error messages), placed next to the source. NEVER under `tests/`, `e2e/`, `cypress/` or `playwright/`.
-10. **Environment example.** Update `.env.example` (rule 4.1.16) and add the `README.md` section.
+7. **Premium 3D experience** (only when `THREE_D=yes` and `MOTION_LEVEL=rich`): implement the scene described in the plan, using the CloudAI-X Three.js skill when discoverable. Lazy-load it after first paint or near the relevant section; do not load real-time 3D below 768px, with Save-Data, or when reduced motion is requested. Provide a visually polished static fallback that preserves the same information and layout. Dispose of geometries, materials, textures, renderers and event listeners, and cancel animation loops on unmount. Verify keyboard access to all controls; never make essential content available only inside the canvas.
+8. **Accessibility pass** over everything you built, against rule 4.1.7.
+9. **Responsive pass** at every VIEWPORT, against rule 4.1.8.
+10. **Unit tests** when UNIT_TESTS is `yes`: use the existing runner. If there is none and PACKAGE_MANAGER is not `none`, add the runner that matches the stack (Vitest for Vite-based stacks, the stack's default otherwise) as a dev dependency and record it. If PACKAGE_MANAGER is `none`, skip and record why. Test the logic (validation, formatting, services, mocks) and component behaviour (states, error messages), placed next to the source. NEVER under `tests/`, `e2e/`, `cypress/` or `playwright/`.
+11. **Environment example.** Update `.env.example` (rule 4.1.16) and add the `README.md` section.
 
 Record, per task: status, files created or changed, and any change to the Expected API (written back into the plan first). For motion also record library, version, licence and size.
 
 ---
+
 ## STEP 5: VISUAL QA  (stage: Visual QA)
 
 **Goal:** Prove it works with tools and numbers, not by judging screenshots by eye. In `fix` mode limit this step to the affected pages. In `audit` mode this step is part of the audit flow and changes no tracked file.
@@ -779,7 +806,7 @@ feat({STORY_ID}): {FEATURE_NAME}
 - Workflow: {WORKFLOW_VERSION}
 ```
 
-In `fix` mode use `fix({STORY_ID}): <n> frontend defects` and list the F-xx IDs. In `audit` mode use `docs({STORY_ID}): frontend audit report`. In `evaluate` mode use `docs: workflow evaluation {WORKFLOW_VERSION}`.
+   In `fix` mode use `fix({STORY_ID}): <n> frontend defects` and list the F-xx IDs. In `audit` mode use `docs({STORY_ID}): frontend audit report`. In `evaluate` mode use `docs: workflow evaluation {WORKFLOW_VERSION}`.
 5. **Push** (`push` mode only): push GIT_BRANCH to origin, verify it (`git ls-remote --heads origin {GIT_BRANCH}`), then print the commit SHA and `https://github.com/{GIT_REPO}/tree/{GIT_BRANCH}`. In `commit` mode print the commit SHA only.
 6. Do not open a pull request unless NOTES asks for one.
 
@@ -985,13 +1012,13 @@ Use these tags in learning entries and for STORY_TAGS: `all`, `forms`, `nav`, `l
 
 ## COMPLETION CRITERIA
 
--  The report exists; in `build` mode the plan exists too
--  Every in-scope AC has a finished task and a line of evidence (`build`), or every listed defect is fixed or explained (`fix`), or every review area is covered (`audit`)
--  All Checks and QA gates were run (or marked unverified with the reason) and the results are in the report
--  QA fix rounds did not exceed QA_FIX_ROUNDS
--  The metrics line is appended and the learning files are within their caps
--  No secret, no `.env` and no off-limits file is staged or changed; this file, the config and an existing brief are untouched
--  The work is committed (and pushed in `push` mode), and the commit SHA is printed (unless GIT_MODE is `none`)
+- [ ] The report exists; in `build` mode the plan exists too
+- [ ] Every in-scope AC has a finished task and a line of evidence (`build`), or every listed defect is fixed or explained (`fix`), or every review area is covered (`audit`)
+- [ ] All Checks and QA gates were run (or marked unverified with the reason) and the results are in the report
+- [ ] QA fix rounds did not exceed QA_FIX_ROUNDS
+- [ ] The metrics line is appended and the learning files are within their caps
+- [ ] No secret, no `.env` and no off-limits file is staged or changed; this file, the config and an existing brief are untouched
+- [ ] The work is committed (and pushed in `push` mode), and the commit SHA is printed (unless GIT_MODE is `none`)
 
 ## FINAL RESPONSE FORMAT
 

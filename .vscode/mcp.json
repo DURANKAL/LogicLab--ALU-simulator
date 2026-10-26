@@ -1,9 +1,17 @@
 {
 "servers": {
+"github": {
+"type": "http",
+"url": "https://api.githubcopilot.com/mcp/",
+"headers": {
+"Authorization": "Bearer ${github_mcp_pat}"
+}
+},
 "playwright": {
 "type": "stdio",
 "command": "npx",
 "args": [
+"-y",
 "@playwright/mcp@latest"
 ]
 },
@@ -11,16 +19,10 @@
 "type": "stdio",
 "command": "npx",
 "args": [
+"-y",
 "playwright",
 "run-test-mcp-server"
 ]
-},
-"github": {
-"type": "http",
-"url": "https://api.githubcopilot.com/mcp/",
-"headers": {
-"Authorization": "Bearer ADDPATHTOKEN"
-}
 }
 },
 "inputs": [
