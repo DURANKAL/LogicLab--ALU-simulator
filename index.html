@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en" class="preview-v2">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#0A1016" />
+    <meta name="description" content="A hands-on field guide to the four-bit ALU. See logic become visible with LogicLab." />
+    <link rel="icon" href="/assets/favicon.svg" type="image/svg+xml" />
+    <title>LogicLab — Logic, made visible</title>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <header class="site-header">
+      <a class="brand" href="/" aria-label="LogicLab home">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+        <span>Logic<span class="brand-light">Lab</span></span>
+      </a>
+      <nav aria-label="Main navigation">
+        <a href="/" data-route="home">Home</a>
+        <a href="/simulator" data-route="simulator">Simulator</a>
+        <a href="/#about" data-route="about">About</a>
+      </nav>
+      <a class="header-cta" href="/simulator">Launch <span>↗</span></a>
+    </header>
+
+    <main id="main-content" tabindex="-1">
+      <div id="home-page">
+        <section class="hero section-shell" aria-labelledby="hero-title">
+          <div class="hero-copy">
+            <p class="eyebrow"><span class="status-mark" aria-hidden="true"></span> AN INTERACTIVE FIELD GUIDE TO DIGITAL LOGIC</p>
+            <h1 id="hero-title" tabindex="-1">The ALU.<br /><span>Under<wbr />stood.</span></h1>
+            <p class="hero-description">Four bits. Four operations. One clear view into the tiny machine doing the work.</p>
+            <a class="button button-primary" href="/simulator">Launch Simulator <span aria-hidden="true">↗</span></a>
+            <div class="hero-index"><span>01 / 04</span><span class="index-rule"></span><span>THE FOUR-BIT ALU</span></div>
+          </div>
+          <div class="hero-visual" aria-label="A four-bit arithmetic logic unit showing signals moving from inputs to output">
+            <div class="visual-topline"><span>FIG 01 — SIGNAL PATH</span><span class="live-tag"><i></i> SYSTEM READY</span></div>
+            <div class="scene-frame">
+              <svg class="hero-fallback" viewBox="0 0 660 400" role="img" aria-labelledby="hero-circuit-title hero-circuit-desc">
+                <title id="hero-circuit-title">Four-bit ALU circuit</title>
+                <desc id="hero-circuit-desc">Two four-bit inputs flow into a central ALU and produce a four-bit output.</desc>
+                <path class="wire wire-muted" d="M40 116H214M40 160H214M40 204H214M40 248H214M446 138H620M446 182H620M446 226H620M446 270H620" />
+                <path class="wire wire-active" d="M40 292H140V204H214M446 204H520V314H620" />
+                <rect class="scene-chip" x="214" y="112" width="232" height="184" rx="2" />
+                <path class="scene-chip-line" d="M239 147H421M239 259H421" />
+                <text class="scene-label" x="242" y="184">ARITHMETIC</text>
+                <text class="scene-label" x="242" y="207">LOGIC UNIT</text>
+                <text class="scene-id" x="242" y="241">ALU / 04</text>
+                <text class="signal-label" x="40" y="91">INPUT A</text>
+                <text class="signal-label" x="40" y="337">INPUT B</text>
+                <text class="signal-label" x="552" y="337">OUTPUT</text>
+                <text class="scene-bit" data-home-value="input-a" x="40" y="106">0101</text>
+                <text class="scene-bit" data-home-value="input-b" x="40" y="359">0011</text>
+                <text class="scene-bit" data-home-value="output" x="551" y="359">0110</text>
+                <circle class="node node-on" cx="142" cy="204" r="5" />
+                <circle class="node node-on" cx="520" cy="314" r="5" />
+              </svg>
+              <canvas id="hero-canvas" aria-hidden="true"></canvas>
+              <div class="scene-caption"><span>01</span><span>INPUT → SELECT → RESULT</span><span>04-BIT</span></div>
+            </div>
+            <p class="visual-note">Not a black box. A circuit you can read.</p>
+          </div>
+        </section>
+
+        <section class="intro-section section-shell reveal" aria-labelledby="understanding-title">
+          <div class="section-kicker"><span>01</span><span>THE BUILDING BLOCK</span></div>
+          <div class="intro-grid">
+            <h2 id="understanding-title">One small unit.<br /><span>Remarkable range.</span></h2>
+            <div class="intro-copy">
+              <p>An arithmetic logic unit is a processor’s decision point. It receives two values, follows an operation, and returns the result—one bit at a time.</p>
+              <p>Here, four switches make the whole process visible. Change an input. Change the operation. Watch the answer take shape.</p>
+            </div>
+          </div>
+          <div class="stat-line">
+            <div><strong>04</strong><span>INPUT BITS</span></div><div><strong>04</strong><span>OPERATIONS</span></div><div><strong>16</strong><span>VALUES / INPUT</span></div><div><strong>01</strong><span>RESULT, MADE CLEAR</span></div>
+          </div>
+        </section>
+
+        <section class="operations-section section-shell reveal" aria-labelledby="operations-title">
+          <div class="section-kicker"><span>02</span><span>OPERATIONS IN ACTION</span></div>
+          <div class="section-heading-row">
+            <h2 id="operations-title">Same inputs.<br /><span>Different thinking.</span></h2>
+            <p>Each operation uses the same four bits in a different way. Choose one to see the logic.</p>
+          </div>
+          <div class="operation-grid">
+            <article class="operation-card"><span class="operation-symbol">∧</span><p class="mono-label">01 / LOGIC</p><h3>AND</h3><p>One only when both input bits are one.</p><p class="operation-example">1 AND 1 <span>= 1</span></p></article>
+            <article class="operation-card"><span class="operation-symbol">∨</span><p class="mono-label">02 / LOGIC</p><h3>OR</h3><p>One when either input bit is one.</p><p class="operation-example">1 OR 0 <span>= 1</span></p></article>
+            <article class="operation-card"><span class="operation-symbol">⊕</span><p class="mono-label">03 / LOGIC</p><h3>XOR</h3><p>One when the input bits are different.</p><p class="operation-example">1 XOR 0 <span>= 1</span></p></article>
+            <article class="operation-card operation-add"><span class="operation-symbol">+</span><p class="mono-label">04 / ARITHMETIC</p><h3>ADD</h3><p>Four-bit addition, with carry-out kept in view.</p><p class="operation-example">1111 + 0001 <span>= 1·0000</span></p></article>
+          </div>
+        </section>
+
+        <section class="circuit-section section-shell reveal" aria-labelledby="circuit-title">
+          <div class="section-kicker"><span>03</span><span>INSIDE THE CIRCUIT</span></div>
+          <div class="section-heading-row">
+            <h2 id="circuit-title">Follow the<br /><span>signal.</span></h2>
+            <p>Every result has a route. Explore the parts to see what enters, what leaves, and why it matters.</p>
+          </div>
+          <div class="circuit-explorer">
+            <div class="explorer-diagram" role="group" aria-label="Explore the ALU circuit components">
+              <button class="explorer-node" type="button" data-explain="logic-gates"><span>A · B</span><strong>LOGIC GATES</strong><i aria-hidden="true">→</i></button>
+              <span class="explorer-wire" aria-hidden="true"></span>
+              <button class="explorer-node explorer-node-active" type="button" data-explain="full-adder"><span>Σ + C</span><strong>FULL ADDER</strong><i aria-hidden="true">→</i></button>
+              <span class="explorer-wire" aria-hidden="true"></span>
+              <button class="explorer-node" type="button" data-explain="selection"><span>SEL</span><strong>OP SELECT</strong><i aria-hidden="true">→</i></button>
+            </div>
+            <div id="component-detail" class="component-detail" aria-live="polite">
+              <p class="mono-label">COMPONENT / 02</p><h3>Full adder</h3>
+              <dl><div><dt>Inputs</dt><dd>A, B, carry-in</dd></div><div><dt>Outputs</dt><dd>Sum, carry-out</dd></div></dl>
+              <p>Adds two bits and the carry from the previous column. Four stages connect to make one four-bit result.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="preview-section section-shell reveal" aria-labelledby="preview-title">
+          <div class="section-kicker"><span>04</span><span>EXPERIENCE THE SIMULATION</span></div>
+          <div class="preview-heading"><h2 id="preview-title">Try the logic.<br /><span>Right here.</span></h2><p>Set two values. Pick an operation. The result follows every change.</p></div>
+          <div class="preview-workbench" data-simulation="preview">
+            <div class="preview-controls">
+              <div class="operand-fields">
+                <fieldset class="operand" data-operand="a"><legend>Input A</legend><div class="bit-switches"></div><label>Decimal <input class="decimal-input" type="number" name="preview-input-a" min="0" max="15" step="1" inputmode="numeric" autocomplete="off" value="5" aria-describedby="preview-error-a" /></label><p class="field-error" id="preview-error-a" role="alert"></p></fieldset>
+                <fieldset class="operand" data-operand="b"><legend>Input B</legend><div class="bit-switches"></div><label>Decimal <input class="decimal-input" type="number" name="preview-input-b" min="0" max="15" step="1" inputmode="numeric" autocomplete="off" value="3" aria-describedby="preview-error-b" /></label><p class="field-error" id="preview-error-b" role="alert"></p></fieldset>
+              </div>
+              <label class="operation-field">Operation<select class="operation-input" name="preview-operation" required><option>AND</option><option>OR</option><option selected>XOR</option><option>ADD</option></select></label>
+            </div>
+            <div class="preview-output" aria-live="polite"><div><span class="mono-label">RESULT / BINARY</span><output class="result-binary">0110</output></div><div><span class="mono-label">DECIMAL</span><output class="result-decimal">6</output></div><div class="carry-output"><span class="mono-label">CARRY-OUT</span><output class="result-carry">0</output></div></div>
+          </div>
+          <a class="text-link" href="/simulator">Open the full simulator <span aria-hidden="true">↗</span></a>
+        </section>
+
+        <section class="about-section section-shell reveal" id="about" aria-labelledby="about-title">
+          <div class="section-kicker"><span>05</span><span>ABOUT THE PROJECT</span></div>
+          <div class="about-grid"><h2 id="about-title" tabindex="-1">Built for the<br /><span>curious.</span></h2><div><p>LogicLab is a small, hands-on introduction to the arithmetic logic unit: a foundational circuit inside every processor.</p><p>It is a learning tool, not a mystery box. Every output, signal, and step is tied to the inputs you choose.</p><a class="text-link" href="/simulator">Explore the ALU <span aria-hidden="true">↗</span></a></div></div>
+          <p class="about-footnote"><span>LOGICLAB / 4-BIT SERIES</span><span>MADE TO MAKE LOGIC VISIBLE.</span></p>
+        </section>
+      </div>
+
+      <section id="simulator-page" class="simulator-page section-shell" aria-labelledby="simulator-title" hidden>
+        <div class="simulator-header">
+          <div><p class="eyebrow"><span class="status-mark" aria-hidden="true"></span> LOGICLAB / 4-BIT WORKBENCH</p><h1 id="simulator-title" tabindex="-1">ALU <span>Simulator</span></h1><p>Set the inputs. Select an operation. Follow every bit to its result.</p></div>
+          <button id="reset-simulator" class="button button-quiet" type="button">Reset <span aria-hidden="true">↺</span></button>
+        </div>
+        <div class="simulator-grid" data-simulation="main">
+          <div class="input-stack">
+          <fieldset class="operand" data-operand="a"><legend>Input A</legend><div class="bit-switches"></div><label>Decimal <input class="decimal-input" type="number" name="input-a-decimal" min="0" max="15" step="1" inputmode="numeric" autocomplete="off" value="0" aria-describedby="simulator-error-a" /></label><p class="field-error" id="simulator-error-a" role="alert"></p></fieldset>
+          <fieldset class="operand" data-operand="b"><legend>Input B</legend><div class="bit-switches"></div><label>Decimal <input class="decimal-input" type="number" name="input-b-decimal" min="0" max="15" step="1" inputmode="numeric" autocomplete="off" value="0" aria-describedby="simulator-error-b" /></label><p class="field-error" id="simulator-error-b" role="alert"></p></fieldset>
+            <label class="operation-field">Operation<select class="operation-input" name="operation" required><option selected>AND</option><option>OR</option><option>XOR</option><option>ADD</option></select></label>
+          </div>
+          <div class="circuit-panel">
+            <div class="panel-topline"><span class="mono-label">LIVE CIRCUIT</span><span class="circuit-operation">AND / 04</span></div>
+            <div class="simulator-circuit" aria-live="polite"></div>
+            <div class="signal-legend"><span><i class="signal-key signal-key-one"></i>1 / HIGH</span><span><i class="signal-key signal-key-zero"></i>0 / LOW</span></div>
+            <div class="circuit-inspection" aria-live="polite"><span class="mono-label">SELECT A COMPONENT</span><p>Choose the gate or adder in the diagram to inspect its inputs, outputs, and purpose.</p></div>
+          </div>
+          <section class="output-panel" aria-labelledby="output-title">
+            <div class="panel-topline"><span class="mono-label">COMPUTED RESULT</span><span class="result-state">READY</span></div>
+            <h2 id="output-title">Output</h2>
+            <output class="main-result-binary" aria-live="polite">0000</output>
+            <div class="output-details"><div><span class="mono-label">DECIMAL</span><output class="main-result-decimal">0</output></div><div class="main-carry" hidden><span class="mono-label">CARRY-OUT</span><output class="main-result-carry">0</output></div></div>
+            <p class="simulation-message" role="status" aria-live="polite">AND evaluated for all four bits.</p>
+          </section>
+          <section class="trace-panel" aria-labelledby="trace-title"><div class="panel-topline"><span class="mono-label">STEP BY STEP</span><span class="trace-index">01 — 04</span></div><h2 id="trace-title">Execution Trace</h2><div class="trace-content"></div></section>
+          <details class="truth-panel"><summary>Truth Table <span aria-hidden="true">＋</span></summary><div class="truth-content"></div></details>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <a class="brand" href="/"><span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span><span>Logic<span class="brand-light">Lab</span></span></a>
+      <p>A four-bit field guide to digital logic.</p><a href="/#about">About the project <span aria-hidden="true">↗</span></a><span class="footer-serial">LL / 04</span>
+    </footer>
+    <div id="runtime-error" class="runtime-error" role="alert" hidden>LogicLab could not update this view. Your inputs are safe—reset the simulator or return Home.</div>
+    <script type="module" src="/assets/js/app.js"></script>
+  </body>
+</html>
