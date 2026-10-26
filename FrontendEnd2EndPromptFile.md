@@ -1,12 +1,12 @@
 # FrontendEnd2EndPromptFile
 
-WORKFLOW_VERSION: v2.2
+WORKFLOW_VERSION: v2.3
 
 # End-to-End Agentic AI Frontend Workflow (one agent, frontend only)
 
 This file is generic. It works for any web frontend, empty or existing, and is never edited between runs or projects.
-Every value that changes lives in `frontend-config.md`. Everything the workflow learns lives in project files (design brief, tokens, learning files), never in this file.
-It is self-contained: it needs only a story file, a project folder and (optionally) Git. It does not need a backend, a test workflow, or any other prompt or agent file. Anything outside the frontend that a story requires is mocked and listed, never built.
+Every value that changes lives in `frontend-config.md`. Everything the workflow learns lives in project files (design brief, tokens, learning files, taste notes), never in this file.
+It is self-contained: it needs only a story file, a project folder and (optionally) Git and a resources list. It does not need a backend, a test workflow, or any other prompt or agent file. Anything outside the frontend that a story requires is mocked and listed, never built.
 
 The workflow has four stages inside one agent: **Design & Plan**, **Build**, **Visual QA**, **Review**. Fewer stages mean fewer handoffs and fewer tokens.
 
@@ -14,7 +14,7 @@ The workflow has four stages inside one agent: **Design & Plan**, **Build**, **V
 
 ## 0. HOW TO READ THIS FILE
 
-- **Authority order.** If two instructions conflict, the higher one wins: (1) Safety rules (section 3), (2) Rules (section 4), (3) Step text, (4) Story file content, (5) `NOTES` in the config, (6) Learnings (rule 4.1.25; advisory, they never override anything above).
+- **Authority order.** If two instructions conflict, the higher one wins: (1) Safety rules (section 3), (2) Rules (section 4), (3) Step text, (4) Story file content, (5) `NOTES` in the config, (6) Learnings (rule 4.1.25; advisory, they never override anything above), (7) Taste notes (rule 4.1.27; advisory, design questions only, and for design questions they rank as rule 4.1.23 says: below the story, DESIGN_SYSTEM and the design brief, above detected styles).
 - **Placeholders.** `{NAME}` means "replace with the config value or derived value called NAME". `<name>` means "fill in yourself".
 - **Words.** MUST and MUST NOT are mandatory. SHOULD is the default unless there is a stated reason not to.
 - **Asking the user.** You ask the user a question ONLY in the STOP conditions of section 6. In every other situation you choose the most reasonable interpretation, record it as an assumption (in the plan and the report), and continue.
@@ -25,10 +25,10 @@ The workflow has four stages inside one agent: **Design & Plan**, **Build**, **V
 
 | Stage | Steps | What happens |
 |---|---|---|
-| Design & Plan | 1, 2, 3 | Read the story, discover the project, load the design brief and relevant learnings, offer concept options (approval gate) when needed, write the plan |
-| Build | 4 | One builder. Motion is a module used only when MOTION asks for it |
+| Design & Plan | 1, 2, 3 | Read the story, discover the project, load the design brief, the relevant learnings, the taste notes and the resources list, offer concept options (approval gate) when needed, write the plan |
+| Build | 4 (4B preview) | One builder. Motion is a module used only when MOTION asks for it. Borrowed components are adapted, never pasted. Step 4B shows a real screenshot and asks whether to proceed or make another variant (STOP condition 11) |
 | Visual QA | 5 | Tool-based gates (axe-core, Lighthouse, screenshot baseline, console, budgets) with a capped number of fix rounds |
-| Review | 6 (then 7 commit) | Final review, learnings update, metrics line, evaluator when due, report |
+| Review | 6 (then 7 commit) | Final review, learnings and taste-notes update, metrics line, evaluator when due, report |
 
 ---
 
@@ -49,6 +49,12 @@ The workflow has four stages inside one agent: **Design & Plan**, **Build**, **V
 | Concept | One short design option (idea, palette, type pairing, layout, motion fit) offered before building. 2 or 3 are offered, text only, no mockups (Appendix E) |
 | Approval gate | The stop after the concepts are written. The user picks one via `DESIGN_CHOICE`; the run then continues (STOP condition 9) |
 | MOTION level | `none`, `subtle` or `rich` for this story (rule 4.1.24). `rich` is never chosen by the workflow |
+| Taste notes | `{TASTE_FILE}`: one merged, small file of the user's likes and advice, written only from what the user typed (rule 4.1.27, format in Appendix I) |
+| Variety concept | One design choice per run that deliberately differs from the user's past likes (rule 4.1.27) |
+| Preview | A real screenshot of the story's primary page, taken in Step 4B, after which the user decides whether to proceed or ask for another variant (rule 4.1.29, STOP condition 11) |
+| Preview variant | One built version of the story's primary page that was shown in a preview. At most MAX_PREVIEW_VARIANTS per story |
+| Resources list | `{RESOURCES_FILE}`: the sites the user allows you to read and borrow from, each with a license and a Status (rule 4.1.28). Read-only for the workflow |
+| Borrowed item | A component, section structure or asset taken from a site in the resources list, adapted and recorded in the plan and the report |
 | Screen states | Loading, empty, error and success of a screen; and idle, busy and disabled of a control |
 | Viewport | One screen size from VIEWPORTS |
 | Check | A command that proves the project is healthy: install, lint, type check, unit tests, build, start |
@@ -72,7 +78,7 @@ The workflow has four stages inside one agent: **Design & Plan**, **Build**, **V
 **Outcome rules (use exactly these):**
 
 - **DONE**: every in-scope AC has a finished task and a line of evidence, all Checks pass, every QA gate passes or does not apply, and no Safety rule was broken. ACs classed "Needs backend" count as covered when their screen side works against the mock; they are listed in the report but do not lower the outcome.
-- **DONE WITH NOTES**: as DONE, but some AC is only partly covered, or a non-critical Check (lint) still fails, or a Medium or Low QA gate still fails after QA_FIX_ROUNDS, or a QA gate is "unverified" because its tool or a browser was not available, or you made assumptions that change behaviour. List each one.
+- **DONE WITH NOTES**: as DONE, but some AC is only partly covered, or a non-critical Check (lint) still fails, or a Medium or Low QA gate still fails after QA_FIX_ROUNDS, or a QA gate is "unverified" because its tool or a browser was not available, or the preview could not be taken ("unverified"), or you made assumptions that change behaviour. List each one.
 - **INCOMPLETE**: any in-scope AC has no working implementation, build or start fails, a High issue remains after QA_FIX_ROUNDS, or the run stopped early. Say why.
 - **Audit mode** uses DONE when every review area in section 5 was covered, otherwise INCOMPLETE.
 - **Evaluate mode** uses DONE when the evaluation report was written. **Regress mode** uses PASS, REGRESSION or BASELINE CREATED (section 5).
@@ -91,7 +97,7 @@ Read `frontend-config.md` (project root) before doing anything else.
 - The root must contain `frontend-config.md`, the configured story folder, and the application's existing files when `PROJECT_STATE = existing`. These must be actual files on disk; files merely open in an editor tab do not count.
 - Before writing anything, inspect the root and the relevant existing source files. Identify the real app entry point, routes, components, styling system, package manager, scripts, assets, and tests from the repository itself.
 - For an existing project, work inside that application. **Do not create a second app inside it, move the app into a new folder, scaffold over it, or replace its source with a generic template.**
-- Resolve `STORIES_DIR`, `FRONTEND_DIR`, `PLANS_DIR`, `REPORTS_DIR`, `KNOWLEDGE_FILE`, `DESIGN_BRIEF`, `LEARNINGS_DIR`, `BASELINE_DIR` and other configured paths relative to the project root unless their descriptions say otherwise. Do not silently change these paths to make the workflow easier.
+- Resolve `STORIES_DIR`, `FRONTEND_DIR`, `PLANS_DIR`, `REPORTS_DIR`, `KNOWLEDGE_FILE`, `DESIGN_BRIEF`, `LEARNINGS_DIR`, `BASELINE_DIR`, `TASTE_FILE`, `RESOURCES_FILE` and other configured paths relative to the project root unless their descriptions say otherwise. Do not silently change these paths to make the workflow easier.
 - If the workflow appears to have started in the wrong folder, or the configured paths do not point to the expected files, stop before writing and report the exact mismatch. Do not search or modify parent/sibling folders to guess which project the user meant.
 
 **Config format**
@@ -132,10 +138,17 @@ Read `frontend-config.md` (project root) before doing anything else.
 | DESIGN_SYSTEM | no | none | `none` or a path to a file or folder describing tokens or components (read-only) |
 | DESIGN_BRIEF | no | design/design-brief.md | Path of the design brief file |
 | DESIGN_APPROVAL | no | auto | `auto`, `on`, `off` (see 2.2) |
+| TASTE_FILE | no | design/taste-notes.md | `none` or a path. The merged taste notes file (rule 4.1.27). `none` turns taste notes and the variety rule off |
+| TASTE_MAX_LINES | no | 60 | Integer 10 to 200. Largest size of the taste notes file, in lines |
+| TASTE_EXPIRY_DAYS | no | 90 | Integer 1 or more. Taste entries older than this are removed |
+| RESOURCES_FILE | no | design/resources.md | `none` or a path (read-only). The resources list (rule 4.1.28). `none` turns borrowing off. A missing file is treated as `none` |
 | EXTERNAL_RESOURCES | no | none | `none` or hostnames separated by commas |
 | OS | no | windows | `windows`, `macos`, `linux` |
 | UNIT_TESTS | no | yes | `yes`, `no` |
-| SCREENSHOTS | no | yes | `yes`, `no` (`no` also turns off the visual baseline gate) |
+| SCREENSHOTS | no | yes | `yes`, `no` (`no` also turns off the visual baseline gate and the preview step) |
+| MAX_PREVIEW_VARIANTS | no | 3 | Integer 1 to 5. Most preview variants offered per story (rule 4.1.29) |
+| PREVIEW_VIEWPORTS | no | 1280x800,390x844 | `WIDTHxHEIGHT` pairs separated by commas. Sizes of the preview screenshots |
+| PREVIEW_CHOICE | no | none | `none`, `proceed`, `another`, or `V<n>` (for example `V2`: take saved variant 2). The answer to the preview question when it is given in the config instead of in chat; honoured only when a preview of this story already exists (rule 4.1.29) |
 | EXPLAIN | no | no | `yes`, `no` |
 | MAX_FIX_ATTEMPTS | no | 3 | Integer 1 to 5. Fix attempts per failing Check |
 | QA_FIX_ROUNDS | no | 2 | Integer 0 to 3. Fix rounds for Visual QA |
@@ -151,7 +164,7 @@ Read `frontend-config.md` (project root) before doing anything else.
 | OFF_LIMITS | no | none | `none` or paths separated by commas |
 | STORIES_DIR | no | user-stories | Folder of story files |
 | PLANS_DIR | no | frontend-plans | Folder of plans and concept files |
-| REPORTS_DIR | no | frontend-reports | Folder of reports, screenshots and QA tools |
+| REPORTS_DIR | no | frontend-reports | Folder of reports, screenshots, previews and QA tools |
 | BASELINE_DIR | no | frontend-reports/baseline | Folder of accepted baseline screenshots |
 | LEARNINGS_DIR | no | learnings | Folder of learning files, metrics and proposals |
 | EVALUATOR_EVERY | no | 5 | Integer 0 or more. Run the evaluator every N stories; 0 = on demand only |
@@ -189,6 +202,8 @@ PLAN_FILE      = {PLANS_DIR}/{STORY_ID}-{FEATURE_NAME}-frontend-plan.md
 CONCEPT_FILE   = {PLANS_DIR}/{STORY_ID}-{FEATURE_NAME}-concepts.md
 REPORT_FILE    = {REPORTS_DIR}/{STORY_ID}-{FEATURE_NAME}-frontend-report.md
 SHOT_DIR       = {REPORTS_DIR}/screenshots/
+PREVIEW_DIR    = {REPORTS_DIR}/previews/{STORY_ID}-{FEATURE_NAME}/
+PREVIEW_NOTES  = {PREVIEW_DIR}preview-notes.md
 QA_DIR         = {REPORTS_DIR}/qa/
 FAILURES_FILE  = {LEARNINGS_DIR}/common-failures.md
 LESSONS_FILE   = {LEARNINGS_DIR}/lessons-learned.md
@@ -206,8 +221,9 @@ Story selection: STORY_ID equals the section's ID (ignoring case and spaces) AND
 
 - Everything inside `{FRONTEND_DIR}`: source, styles, components, pages, public assets, mocks, and unit tests placed next to the code they test.
 - Root-level files the frontend stack needs: `index.html`, bundler and compiler config (`vite.config.*`, `tsconfig*.json`, `tailwind.config.*`), `package.json` and the lock file. In an existing project you only add to these (dependencies, scripts, config entries); you never remove or rewrite existing entries.
-- `{PLANS_DIR}/` (plans and concept files), `{REPORTS_DIR}/` (including screenshots and `{QA_DIR}`), `{BASELINE_DIR}/`, `{KNOWLEDGE_FILE}`.
+- `{PLANS_DIR}/` (plans and concept files), `{REPORTS_DIR}/` (including screenshots, `{PREVIEW_DIR}` and `{QA_DIR}`), `{BASELINE_DIR}/`, `{KNOWLEDGE_FILE}`.
 - `{LEARNINGS_DIR}/`: `common-failures.md`, `lessons-learned.md`, `metrics.csv`, `evaluator-state.md`, `proposals/`, and (regress mode) `baseline-metrics.md`.
+- `{TASTE_FILE}` (in `build` and `fix` mode only; rule 4.1.27).
 - `{DESIGN_BRIEF}`: only to create it when it does not exist (rule 4.1.23). Once it exists you never change it.
 - `.env.example` (fake placeholder values only), `.gitignore` (append lines only), `README.md` (append one section only).
 - In `audit` mode: only `{REPORTS_DIR}/`, `{KNOWLEDGE_FILE}` and `{LEARNINGS_DIR}/`.
@@ -216,7 +232,7 @@ Story selection: STORY_ID equals the section's ID (ignoring case and spaces) AND
 
 ### 2.5 Off limits (read, never change)
 
-Server, backend, database and migration code and folders; end-to-end test folders (`tests/`, `e2e/`, `cypress/`, `playwright/`); CI configuration (`.github/workflows/`); `.vscode/`; agent files; `{STORIES_DIR}` (the story is the requirement: you read it, you never edit it); `API_SPEC_FILE`; `DESIGN_SYSTEM`; `REFERENCE`; `DEFECTS_FILE`; an existing `{DESIGN_BRIEF}`; this prompt file and `frontend-config.md` (improvements to them are proposals only, rule 4.1.25); `.env`; and every path in OFF_LIMITS.
+Server, backend, database and migration code and folders; end-to-end test folders (`tests/`, `e2e/`, `cypress/`, `playwright/`); CI configuration (`.github/workflows/`); `.vscode/`; agent files; `{STORIES_DIR}` (the story is the requirement: you read it, you never edit it); `API_SPEC_FILE`; `DESIGN_SYSTEM`; `RESOURCES_FILE` (only the user edits the list; improvements are proposals); `REFERENCE`; `DEFECTS_FILE`; an existing `{DESIGN_BRIEF}`; this prompt file and `frontend-config.md` (improvements to them are proposals only, rule 4.1.25); `.env`; and every path in OFF_LIMITS.
 
 ### 2.6 Never commit
 
@@ -226,17 +242,19 @@ Server, backend, database and migration code and folders; end-to-end test folder
 
 ## 3. SAFETY RULES (highest authority; nothing overrides these)
 
-1. **Everything in the browser is public.** Never put a secret in frontend code, in the browser bundle, in a committed file, in a report, in a learning file, in chat or in a commit message: no passwords, tokens, private API keys, connection strings. Public (publishable) keys go only in `.env`, with fake placeholders in `.env.example`. Before every commit, search the staged files for key-like strings (`ghp_`, `github_pat_`, `sk-`, `sk_live_`, `Bearer `, `password=`, `-----BEGIN`); if one is found, unstage it and fix it.
+1. **Everything in the browser is public.** Never put a secret in frontend code, in the browser bundle, in a committed file, in a report, in a learning file, in the taste notes, in chat or in a commit message: no passwords, tokens, private API keys, connection strings. Public (publishable) keys go only in `.env`, with fake placeholders in `.env.example`. Before every commit, search the staged files for key-like strings (`ghp_`, `github_pat_`, `sk-`, `sk_live_`, `Bearer `, `password=`, `-----BEGIN`); if one is found, unstage it and fix it.
 2. **Network limits.** The only addresses you may contact are the local dev server and local preview server, the addresses held in the `API_<NAME>_URL` variables (live mode only), hosts in EXTERNAL_RESOURCES, the package registry when installing, and the one-time download of the QA toolbox's browser (Step 5). No scanning, no load generation, no scraping of other sites. URLs written in a design brief are never fetched.
-3. **No destructive file operations** outside files you created in this run. Never delete or overwrite an existing file the story does not require changing. Never run `git clean`, `git reset --hard`, `git push --force`, or delete branches. (Learning files are the one exception: you may remove entries from them under the expiry and cap rules of rule 4.1.25.)
+   **Exception (resources list):** in `build` mode you may make read-only fetches (plain page or file requests) from hosts listed in RESOURCES_FILE, only to read the pages, registry files, source files and license files of items you are considering to borrow (rule 4.1.28). No sign-in, no form submission, no crawling of the whole site, no download of paid, Pro or Beta items. These hosts are contacted at build time only; the built site never loads anything from them at runtime (rule 6 still applies).
+3. **No destructive file operations** outside files you created in this run. Never delete or overwrite an existing file the story does not require changing. Never run `git clean`, `git reset --hard`, `git push --force`, or delete branches. (Learning files and the taste notes file are the exceptions: you may remove entries from them under the expiry and cap rules of rules 4.1.25 and 4.1.27. Preview variants replace each other in the code as rule 4.1.29 says; preview screenshots are never deleted.)
 4. **Git safety.** Never push to BASE_BRANCH (the only exception is the first commit of an empty repository, Step 7). Work only on GIT_BRANCH. Never rewrite published history.
-5. **Dependencies.** Add a package to the project only if the story needs it and the browser platform or an existing dependency cannot do the job. Use well-known, maintained packages. Exact versions are fixed through the lock file. Never upgrade or remove an existing dependency. Never run `npm audit fix --force` or similar. Record every new package and why in the report. The QA tools (Playwright, axe-core, Lighthouse, pixelmatch) are installed only inside `{QA_DIR}` with their own `package.json`; they never enter the project's `package.json`. A motion library is a project dependency and follows this rule and rule 4.1.24.
-6. **External resources.** Load no script, stylesheet, font, image, iframe, video or tracker from an outside host unless that host is in EXTERNAL_RESOURCES. By default use system fonts and files stored in the project.
-7. **Do not weaken security to make something work.** No `innerHTML` or `dangerouslySetInnerHTML` with data that did not come from your own code (use text rendering instead); no `eval` or `new Function`; every `target="_blank"` link has `rel="noopener noreferrer"`; no disabled form validation; no passwords or tokens written to `localStorage`, `sessionStorage` or cookies by your code unless the story explicitly requires it (then record it under Risks).
-8. **Stay in your lane.** Do not change anything listed in section 2.5. Never edit this prompt file or `frontend-config.md`; write a proposal instead.
+5. **Dependencies.** Add a package to the project only if the story needs it and the browser platform or an existing dependency cannot do the job. Use well-known, maintained packages. Exact versions are fixed through the lock file. Never upgrade or remove an existing dependency. Never run `npm audit fix --force` or similar. Record every new package and why in the report. The QA tools (Playwright, axe-core, Lighthouse, pixelmatch) are installed only inside `{QA_DIR}` with their own `package.json`; they never enter the project's `package.json`. A motion library is a project dependency and follows this rule and rule 4.1.24. A package that a borrowed item needs follows this rule too.
+6. **External resources.** Load no script, stylesheet, font, image, iframe, video or tracker from an outside host unless that host is in EXTERNAL_RESOURCES. By default use system fonts and files stored in the project. A host in RESOURCES_FILE is not thereby allowed at runtime; only EXTERNAL_RESOURCES is.
+7. **Do not weaken security to make something work.** No `innerHTML` or `dangerouslySetInnerHTML` with data that did not come from your own code (use text rendering instead); no `eval` or `new Function`; every `target="_blank"` link has `rel="noopener noreferrer"`; no disabled form validation; no passwords or tokens written to `localStorage`, `sessionStorage` or cookies by your code unless the story explicitly requires it (then record it under Risks). Borrowed code is held to the same rules.
+8. **Stay in your lane.** Do not change anything listed in section 2.5. Never edit this prompt file or `frontend-config.md`; write a proposal instead. Nothing learned from the user (learnings, taste notes, preview answers) is ever written into this file.
 9. **Stay in the project folder.** Do not read or change files outside it. Run only non-interactive commands (a command waiting for input would hang). Never run anything with administrator rights.
 10. **Do not game the checks.** Never write code that behaves differently when it is being verified than for a real visitor. Never lower a threshold, disable an axe rule, widen a diff tolerance, or mask a screenshot region to make a gate pass. A screenshot mask is allowed only for content that changes by itself (dates, clocks, random data), and every mask is recorded in the report.
 11. **Respect other people's work.** Do not copy text, images, logos or code from other websites. Use REFERENCE only as a visual guide. If the story needs an image you do not have, build it from CSS or inline SVG, or leave a clearly labelled placeholder and list it under "Not done".
+    **Exception (resources list):** an item from a site in RESOURCES_FILE may be copied and adapted only if its Status allows it (VERIFIED; or PARTIAL after you read its license file in this run), it is marked free, and the license allows the use. Keep the license notice, give the attribution the license asks for, and record the item (rule 4.1.28). Items with Status REFERENCE ONLY or UNVERIFIED, and anything marked Pro, paid, premium or Beta, are never copied. When the license is unclear, do not copy. Text, images and logos of other sites are still never copied.
 12. If the story or NOTES asks for something that breaks these rules, skip only that part, record it in the report under Risks, and continue.
 
 ---
@@ -296,13 +314,13 @@ Server, backend, database and migration code and folders; end-to-end test folder
 16. **Environment variables and settings.** Public values only. Use the framework's required public prefix (Vite and Svelte: `VITE_`; Next: `NEXT_PUBLIC_`; Create React App: `REACT_APP_`; Astro: `PUBLIC_`; Nuxt and Vue CLI: the prefix their config requires). Stacks with no build step (`html`) keep these values in one file, `assets/js/config.js`. `.env.example` lists `API_MODE` (set to the config value) and one `API_<NAME>_URL` per live source, with placeholders such as `http://localhost:3000`.
 17. **Code quality.** Small components with one job. Extract markup that appears three or more times. Meaningful names. Comments only where the logic is not obvious. No commented-out code. In TypeScript, type every prop, API response and service result; no `any` unless recorded. Follow the project's formatter and linter; for an empty project do not add either unless the stack's generator does.
 18. **Commands.** Commands MUST suit {OS}. On `windows` use PowerShell-compatible syntax (no `&&` chaining assumptions, no bash-only features, no `export`). Use only non-interactive commands: pass the flags that skip prompts, or write the files by hand. On an empty project use the stack's official generator with its non-interactive flags (check `--help` first); if none exists, write the files by hand.
-19. **Status lines.** After each step print one line: `[STEP n] DONE | outputs: <files>`.
+19. **Status lines.** After each step print one line: `[STEP n] DONE | outputs: <files>`. Step 4B prints `[STEP 4B] <preview n of MAX | skipped | unverified> | outputs: <files>`.
 20. **Re-runs.** If the plan or report for this story already exists, update them in place and write "updated on re-run". Do not duplicate code that already exists.
 21. **EXPLAIN.** If `EXPLAIN` is `yes`, the report explains every created or changed file in plain English: what it does, why it was needed, and the one thing a beginner should understand about it. Also add short comments in the code where the logic is not obvious.
 22. **Checks are never silenced.** Do not add `eslint-disable`, `@ts-ignore`, `@ts-expect-error` or skipped tests to make a Check pass. If one is truly unavoidable, add a one-line reason beside it and record it in the report.
 23. **Design brief and concepts (keeps the site consistent).**
     - `{DESIGN_BRIEF}` is the fixed design reference of the project (format in Appendix D). Read it in Step 2 and follow it in every story: tone, do and don't, type, layout, imagery and motion personality. You do not invent a new look per story.
-    - Priority for design questions: story text and ACs, then DESIGN_SYSTEM (tokens), then the brief, then detected styles. Where DESIGN_SYSTEM and the brief conflict on a token value, DESIGN_SYSTEM wins and the conflict is listed under Assumptions.
+    - Priority for design questions: story text and ACs, then DESIGN_SYSTEM (tokens), then the brief, then the taste notes (rule 27), then detected styles. Where DESIGN_SYSTEM and the brief conflict on a token value, DESIGN_SYSTEM wins and the conflict is listed under Assumptions.
     - **Brief missing, empty project:** DESIGN_APPROVAL resolves to `on`. Offer 2 or 3 concepts (Appendix E) and stop at the approval gate (STOP condition 9). After the user picks via DESIGN_CHOICE, create the brief and the tokens from the chosen concept (status `approved`). If REFERENCE is an image of the finished design, do not offer options: derive the brief from it and mark it `derived from REFERENCE`.
     - **Brief missing, existing project:** do not offer options. Derive a short draft brief from the existing look (tokens, fonts, spacing, tone of the copy), mark it `status: derived (review me)`, and list it under Assumptions.
     - **Brief exists:** no options unless DESIGN_APPROVAL is explicitly `on` (a new section type, a rebrand). Then the concepts must stay inside the brief unless NOTES says otherwise, and the picked concept is recorded in the plan, not written into the brief. Only the user changes the brief; to suggest a change, write a proposal (rule 25).
@@ -344,16 +362,41 @@ Server, backend, database and migration code and folders; end-to-end test folder
     - **Contradictions.** Before writing, compare the new lesson with entries that share a tag. If it says the opposite of an existing entry, do not write it; write a proposal that shows both entries and the evidence, and let the user decide.
     - **Core instructions are never changed by the workflow.** When a lesson becomes a rule and is general enough to belong in this file, or when the evaluator finds a recurring problem or a worsening metric, write a proposal to `{PROPOSALS_DIR}/P-<date>-<n>.md`: the problem, the evidence links, the change as a diff against this file or `frontend-config.md`, the expected effect, and the risk. The user decides. After the user changes this file, `WORKFLOW_VERSION` is raised by the user and the three test stories are re-run (section 5, `regress`).
 26. **Version and metrics.** Every report, metrics line and proposal carries `WORKFLOW_VERSION`. Every run measures the metrics of Step 6C, from real command output, never an estimate.
+27. **Taste notes (the user's own preferences, kept small).** `{TASTE_FILE}` is one merged file of the user's likes and advice (format in Appendix I). Do nothing under this rule when TASTE_FILE is `none`.
+    - **When used.** Read in `build` mode (Step 2); written in `build` and `fix` mode (Step 6B). In `audit` and `evaluate` mode the file is neither read nor written. In `regress` mode it is not read, not written, and the variety rule does not apply, so the result measures the prompt and not the user's taste.
+    - **Filled only from what the user typed.** The sources are: the user's chat messages to you in this run, the reply at a STOP gate (including the preview answer, saved in `{PREVIEW_NOTES}`), and NOTES. Record a statement only when it is a lasting preference or direction (for example "I like large serif headings", "I don't like carousels", "avoid dark footers", "next time use more whitespace"). A one-off change request for this story ("make the button bigger") is not a taste entry. If you cannot tell the two apart, do not record it.
+    - **Silence creates nothing.** If the user typed no preference, write no entry. Never infer taste from silence, from an approval or a `proceed` answer, from which concept or variant was picked, from the accepted result, from the look of the existing project, or from anything the user did not write. Never copy secrets or personal data into the file.
+    - **Entry.** One line: `- [<APP_NAME> | <YYYY-MM-DD>] like: <text>` or `- [<APP_NAME> | <YYYY-MM-DD>] advice: <text>`. `like` is something the user likes or dislikes (write it as "likes ..." or "dislikes ..."); `advice` is a direction to follow. Plain words, at most 200 characters, in the user's meaning, not copied at length.
+    - **Size and expiry.** The file stays at or under TASTE_MAX_LINES lines (header lines included). On every write, first remove entries whose date is older than TASTE_EXPIRY_DAYS; if the file is still over the cap, remove the oldest entries first. If a new statement means the same as an existing entry, update that entry's date and project tag instead of adding a second one. If a new statement contradicts an existing entry, the newer statement replaces the older one.
+    - **Authority.** For design questions the order is: story text and ACs, DESIGN_SYSTEM, the design brief, taste notes, detected styles (rule 23). Taste notes never change a token value, an AC, a brief rule, an accessibility rule or a Safety rule. An `advice` entry is followed unless something above it forbids it. A `like` entry is a leaning, not an order. Note in the plan which entries you used and which you set aside, and why.
+    - **Variety rule.** In every `build` run where the taste notes hold at least one `like` entry, at least one design concept of the run MUST deliberately differ from those likes. When concepts are offered (rule 23), at least one of the 2 or 3 options differs. When no options are offered, the plan's section 3 names one **Variety concept**: a single deliberate choice (composition, type treatment, section type, imagery style or motion move) that departs from the likes while staying inside the story, DESIGN_SYSTEM, the brief, accessibility and the budgets. A Variety concept never contradicts an `advice` entry. It is labelled "Variety concept" in the plan and the report so the user can reject it, and a rejection typed by the user becomes a taste entry under this rule. If the taste notes hold no `like` entry, no Variety concept is needed.
+    - **Never written into this file.** Taste notes live in `{TASTE_FILE}` only. They never change this prompt, the config or the design brief (rules 23 and 25 and Safety rule 8).
+28. **Free component resources.** `{RESOURCES_FILE}` lists the sites the user lets you read and borrow from. Each row has a Type (`components`, `library`, `tool` or `inspiration`), a license summary, a license page and a Status. The list is read-only for you (section 2.5). Do nothing under this rule when RESOURCES_FILE is `none` or the file is missing (say "no resources" in the plan).
+    - **When used.** In `build` mode only. In `fix`, `audit` and `evaluate` mode nothing is borrowed. In `regress` mode the list is treated as `none`, so network fetches do not disturb the comparison.
+    - **Order of choice.** First reuse what the existing project already has (rule 4). Then look in the resources list for a suitable free item (rule 4.2.4). Only then build from scratch.
+    - **Status decides reuse.** `VERIFIED`: may be reused, within the license, for items marked free. `PARTIAL`: may be reused only after you fetch the item's license file (the repository `LICENSE` or the license page named in the row) read-only in this run and write what it says in the plan table. `REFERENCE ONLY` and `UNVERIFIED`: never reused; look at structure and layout ideas only. Anything marked Pro, paid, premium or Beta is never reused, whatever the Status. If the license is unclear, says personal use only, or conflicts with the use, do not reuse. A third-party part inside an item (for example a GSAP dependency) has its own license; check it too.
+    - **Plan before code.** Every borrowed item is listed in the plan's "Borrowed Items" table (item, source URL, license, Status, attribution, adaptation). An item that is not in that table must not appear in the code.
+    - **Adapt, never paste.** Adapt every borrowed item in Step 4 to the project's tokens (rule 6), accessibility (rule 7), responsiveness (rule 8), screen states (rule 9), motion level, library limit and budgets (rule 24) and the security rules (Safety rule 7). Remove trackers, analytics, remote assets, hotlinks and anything that loads from an outside host (Safety rule 6). A borrowed item that needs a library the MOTION level or MOTION_LIBRARY does not allow, or that needs WebGL or WebGPU without a working fallback, is not used.
+    - **Notice and attribution.** Keep the license or copyright notice in each copied file (a short comment is enough). Give the attribution the license asks for, in the place it asks for; when it names none, a credit line in the footer or in a code comment, recorded in the report.
+    - **Inspiration and landing pages.** Items of Type `inspiration`, and whole landing pages of any site, are only starting points for the structure of a section or a layout idea. Never reproduce a whole page, its section order, its imagery, its text or its visual identity, so that sites made with this workflow do not look alike. The design brief decides the look.
+    - **Report.** The report's "Third-party components" section lists every borrowed item with source, license, Status and the attribution used (Step 6E). Suggest additions or corrections to the resources list as a proposal (rule 25), never by editing it.
+29. **Preview before QA.** In `build` mode, after Step 4 and before Step 5, Step 4B takes a real screenshot of the story's primary page and asks the user whether to proceed or make another variant (STOP condition 11).
+    - **Real screenshot only.** The preview is a Playwright screenshot of the running app. Never describe a page you did not see, and never replace the screenshot with a description. If the screenshot cannot be taken, say so plainly, mark the preview `unverified` and continue to Step 5 without the stop.
+    - **Variant cap.** At most MAX_PREVIEW_VARIANTS variants per story. When the cap is reached, stop offering "another" and ask the user to pick one of the saved variants.
+    - **Variants.** A new variant stays inside the story, the ACs, DESIGN_SYSTEM, the brief, accessibility and the budgets, and differs visibly from the earlier variants in composition (layout, section order or emphasis, type scale use, imagery, motion within the level), not only in colour. Variant N replaces variant N-1 in the code; the variants are not kept side by side. Each variant is described in the plan's "Preview Variants" table so any saved variant can be rebuilt.
+    - **Files.** Screenshots and the user's typed answers are saved as separate files per story in `{PREVIEW_DIR}`: images as `preview-v<N>-<WIDTH>.png`, the answers in `{PREVIEW_NOTES}`. Screenshots are never overwritten or deleted.
+    - **Answer.** The answer comes from the user's next chat message, or from `PREVIEW_CHOICE` in the config on a re-run. `PREVIEW_CHOICE` is honoured only when `{PREVIEW_DIR}` already holds a preview of this story; otherwise it is ignored and noted, so an old value never skips the preview of a new story.
+    - **Not in other modes.** No preview in `fix`, `audit`, `evaluate` or `regress`, and none when SCREENSHOTS is `no`.
 
 ### 4.2 Efficiency rules
 
 1. One story per run.
 2. Read `{KNOWLEDGE_FILE}` if it exists and reuse it instead of re-exploring. Create or update it in Step 2 and again at the end of Step 5: merge, never duplicate, keep it under 150 lines.
 3. Do not re-read a file already in context. Do not echo file contents into chat.
-4. Reuse before writing: look for an existing component, style, token, helper or service first.
+4. Reuse before writing: look for an existing component, style, token, helper or service first; then, in `build` mode, check `{RESOURCES_FILE}` for a suitable free item (rule 4.1.28) before building a component from scratch. Fetch only the pages of the items you will actually borrow.
 5. Fix a failing Check at most MAX_FIX_ATTEMPTS times per distinct failure. One attempt = one edit plus a re-run of that Check. Fix Visual QA failures in at most QA_FIX_ROUNDS rounds. Then record what still fails as unresolved with your diagnosis.
 6. Mark low-confidence decisions in the plan so the human reviewer knows where to look.
-7. Screenshots: at most one per page per viewport (per theme when THEME is `both`), taken after the final fix, plus one for every defect or finding.
+7. Screenshots: at most one per page per viewport (per theme when THEME is `both`), taken after the final fix, plus one for every defect or finding. Preview screenshots (rule 4.1.29) are counted separately: one per variant per PREVIEW_VIEWPORT.
 8. Run the Checks after each group of related changes, not after every file.
 9. Load only the learnings that match STORY_TAGS (rule 25). Load the motion module guidance only when MOTION_LEVEL is not `none`.
 10. Build the QA toolbox once and reuse it. In later rounds re-run only the gates that failed. In `fix` mode run the gates only on the affected pages.
@@ -368,8 +411,16 @@ Server, backend, database and migration code and folders; end-to-end test folder
 | Purpose | Implement the story | Fix listed problems in an existing project | Review an existing project; change no source code | Read the metrics and learnings, report trends, propose changes | Re-run the 3 fixed test stories and compare with the baseline metrics |
 | Needs PROJECT_STATE | `empty` or `existing` | `existing` | `existing` | any | `empty` (a scratch folder) |
 | Needs a story | yes | yes | yes | no | no (uses `{LEARNINGS_DIR}/test-stories.md`) |
-| Steps | 1 to 7 | 1, 2, FIX FLOW, 5 (limited), 6, 7 | 1, 2, AUDIT FLOW, 6, 7 | EVALUATE FLOW, 7 | REGRESS FLOW |
+| Steps | 1 to 7 (with 4B) | 1, 2, FIX FLOW, 5 (limited), 6, 7 | 1, 2, AUDIT FLOW, 6, 7 | EVALUATE FLOW, 7 | REGRESS FLOW |
 | Files changed | Whatever the story needs | Only what the listed problems need | Report, knowledge and learning files only | Evaluation report and learning files only | The scratch project, regression report |
+
+**Taste notes, resources and preview by mode**
+
+| | `build` | `fix` | `audit` | `evaluate` | `regress` |
+|---|---|---|---|---|---|
+| Taste notes (rule 4.1.27) | read and written; variety rule applies | written only (nothing is read) | not used | not used | not used |
+| Resources list (rule 4.1.28) | read; items may be borrowed | not used | not used | not used | treated as `none` |
+| Preview (rule 4.1.29, Step 4B) | yes | no | no | no | no |
 
 **FIX FLOW (replaces Steps 3 and 4 when TASK is `fix`)**
 
@@ -390,7 +441,7 @@ Server, backend, database and migration code and folders; end-to-end test folder
 
 **EVALUATE FLOW (TASK is `evaluate`; also runs automatically at the end of Step 6 when due)**
 
-The evaluator is cheap by design: it reads `{METRICS_FILE}`, `{FAILURES_FILE}`, `{LESSONS_FILE}`, `{LEARNINGS_DIR}/evaluator-state.md` and the baseline metrics file, nothing else (rule 4.2.11).
+The evaluator is cheap by design: it reads `{METRICS_FILE}`, `{FAILURES_FILE}`, `{LESSONS_FILE}`, `{LEARNINGS_DIR}/evaluator-state.md` and the baseline metrics file, nothing else (rule 4.2.11). It never reads the taste notes.
 
 - **When it runs.** On demand (`TASK = evaluate`), or automatically at the end of Step 6 when EVALUATOR_EVERY is above 0 and the number of metrics rows minus `last_evaluated_rows` in `evaluator-state.md` is at least EVALUATOR_EVERY.
 - **What it writes** to `{REPORTS_DIR}/evaluation-<date>.md` (one page): for the rows since the last evaluation and for the window before it: average share of ACs passing on the first try, average fix loops per story, Lighthouse performance and accessibility, bundle size, visual difference, minutes and tokens per story, each with the trend (better, same, worse); the 3 most repeated failures with their counts; learning-file sizes against the caps, new rules, contradictions found; and a list of proposals written.
@@ -403,7 +454,7 @@ The evaluator is cheap by design: it reads `{METRICS_FILE}`, `{FAILURES_FILE}`, 
 Run only after this prompt file changed, never because a learning file changed. Run it in a scratch folder.
 
 1. Preconditions: PROJECT_STATE is `empty`, GIT_MODE is `none`, `{LEARNINGS_DIR}/test-stories.md` holds the three fixed stories (a landing page `RT-001`, a form `RT-002`, a dashboard `RT-003`) and `{DESIGN_BRIEF}` exists. Otherwise STOP condition 1.
-2. For each test story, in order, run Steps 1 to 6 as `build` with DESIGN_APPROVAL `off`, MOTION `subtle` and `UNIT_TESTS` as configured. Do not read the learning files (so the result measures the prompt, not past lessons). Do not write learnings. Do not commit.
+2. For each test story, in order, run Steps 1 to 6 as `build` with DESIGN_APPROVAL `off`, MOTION `subtle` and `UNIT_TESTS` as configured. Do not read the learning files or the taste notes (so the result measures the prompt, not past lessons or taste), treat RESOURCES_FILE as `none`, and skip Step 4B (no preview, no question). Do not write learnings or taste notes. Do not commit.
 3. Collect for each story: outcome, share of ACs passing on the first try, fix loops, Lighthouse performance and accessibility, bundle size, visual difference against the story's own earlier run if any.
 4. Compare with `{LEARNINGS_DIR}/baseline-metrics.md`:
    - **BASELINE CREATED**: no baseline exists; write it now with `WORKFLOW_VERSION`.
@@ -427,6 +478,7 @@ Run only after this prompt file changed, never because a learning file changed. 
 | 8 | Install, build or start still fails after MAX_FIX_ATTEMPTS and nothing runnable exists | stop Step 5, then do Steps 6 and 7 and report INCOMPLETE |
 | 9 | Approval gate: DESIGN_APPROVAL resolved to `on`, the concepts are written, and `DESIGN_CHOICE` is `none` (or names an option that is not in the concept file) | stop after writing the concept file |
 | 10 | `THREE_D=ask` for a build task: stop before implementation and ask the user to set `THREE_D=yes` or `THREE_D=no` in `frontend-config.md`. Do not assume a choice from `MOTION=rich` or from the installed skill | stop after pre-flight validation and project discovery; do not implement or commit |
+| 11 | Preview gate (Step 4B): a real preview screenshot of a variant has been taken and the user has not yet answered whether to proceed or make another variant (or, at the cap, which saved variant to take) | stop after saving the screenshots; Step 5 does not start until the answer is given |
 
 **STOP message format (print exactly, then nothing else):**
 
@@ -446,6 +498,22 @@ STOPPED at STEP 2: 3D approval is required before implementation.
 Needed from you: set THREE_D = yes to build the premium 3D experience, or THREE_D = no to build a premium non-3D site, in frontend-config.md, then run again.
 ```
 
+- STOP condition 11: leave all files in place, commit nothing, do not start Step 5. Print one of these two messages, with the real paths and numbers:
+
+```
+STOPPED at STEP 4B: preview <N> of {MAX_PREVIEW_VARIANTS} is ready.
+Screenshots: <one path per PREVIEW_VIEWPORT>
+Needed from you: reply "proceed" to continue to QA, or "another" for a different variant. You can add what you like or dislike in the same message. In a new run, set PREVIEW_CHOICE = proceed or another in frontend-config.md instead.
+```
+
+```
+STOPPED at STEP 4B: the limit of {MAX_PREVIEW_VARIANTS} preview variants is reached.
+Screenshots: <paths of every saved variant>
+Needed from you: reply with the variant to keep (V1, V2, ...). In a new run, set PREVIEW_CHOICE = V<n> in frontend-config.md instead.
+```
+
+  If the chat session is still open, the user's next message is the answer: "proceed", "ok", "looks good" or similar means proceed; "another", "different", "try again" or similar means another; a variant name means that variant. If the reply is unclear, print the STOP message once more; do not guess. Any like, dislike or advice typed in the reply is saved to `{PREVIEW_NOTES}` (rule 4.1.27).
+
 ---
 
 ## STEP 1: PRE-FLIGHT AND READ THE STORY  (stage: Design & Plan)
@@ -459,7 +527,7 @@ Needed from you: set THREE_D = yes to build the premium 3D experience, or THREE_
 3. If the stack needs Node (anything but plain `html` with PACKAGE_MANAGER `none`), confirm `node --version` and the package manager's `--version` work.
 4. Check PROJECT_STATE against the folder (STOP condition 4). "Existing" means a `package.json` with a frontend dependency, or `.html` pages, or source files in a frontend folder.
 5. If GIT_MODE is not `none`: confirm the folder is a Git repository (or is empty of Git, see Step 7). If GIT_MODE is `push`, confirm the `origin` remote matches GIT_REPO (add `https://github.com/{GIT_REPO}.git` if there is none; if a different remote exists, STOP condition 7).
-6. Confirm every path named in the config (REFERENCE, DEFECTS_FILE, API_SPEC_FILE, DESIGN_SYSTEM) exists when it is not `none`. A missing REFERENCE or DESIGN_SYSTEM: note it as an assumption and continue without it. A missing API_SPEC_FILE: treat it as `none` and note it. A missing DEFECTS_FILE in fix mode: STOP condition 6. A missing DESIGN_BRIEF is not an error (Step 3A handles it).
+6. Confirm every path named in the config (REFERENCE, DEFECTS_FILE, API_SPEC_FILE, DESIGN_SYSTEM, RESOURCES_FILE) exists when it is not `none`. A missing REFERENCE or DESIGN_SYSTEM: note it as an assumption and continue without it. A missing API_SPEC_FILE: treat it as `none` and note it. A missing RESOURCES_FILE: treat it as `none` and note it. A missing DEFECTS_FILE in fix mode: STOP condition 6. A missing DESIGN_BRIEF or TASTE_FILE is not an error (Step 3A and Step 6B handle them).
 7. Version notice: if `{LEARNINGS_DIR}/baseline-metrics.md` exists and its `WORKFLOW_VERSION` differs from this file's, print one line: `Prompt changed since the regression baseline: run TASK = regress`. Do not stop.
 
 ### 1B. Select the story
@@ -502,12 +570,14 @@ Assumptions: <list or none>
 4. **Empty project:** apply the "Empty project" column of section 2.2. Record each choice as an assumption.
 5. Read DESIGN_SYSTEM and REFERENCE when given. Read API_SPEC_FILE when given; note which routes it defines.
 6. Read `{DESIGN_BRIEF}` and the tokens file when they exist (rule 4.1.23).
-7. Load the learnings (rule 4.1.25): only entries tagged with a STORY_TAG or `all`, rules first, at most 15. List their IDs in the plan. In `regress` mode do not load them.
-8. Resolve MOTION, MOTION_LIBRARY, THREE_D, DESIGN_APPROVAL and BUDGET_MOTION_KB (section 2.2).
-9. **3D gate.** For TASK=`build`, if `THREE_D=ask`, complete read-only discovery and resolve the other settings, then stop using STOP condition 10 before writing implementation, design files or reports. Ask only this decision: should this premium site include real interactive 3D? The user must choose yes or no by updating THREE_D in `frontend-config.md` and rerunning. Do not infer yes from `MOTION=rich`, NOTES mentioning premium visuals, or skill availability. For TASK=`fix` or `audit`, `THREE_D=ask` resolves to `no`.
-10. **Existing project only:** run the Checks that already exist (install if `node_modules` is missing, lint, type check, unit tests, build, start) once to learn the baseline. Record what already fails, so you do not take the blame or "fix" it unasked.
-11. Write or update `{KNOWLEDGE_FILE}` (format in Appendix B).
-12. Print the resolved settings, one per line.
+7. **Taste notes.** In `build` mode, when TASTE_FILE is not `none` and the file exists, read it (it is small by design). Note how many entries it holds and how many are `like` and `advice`. Remove no entry now (expiry happens when the file is written, Step 6B). Not in `fix`, `audit`, `evaluate` or `regress` mode. List the entries you will use in the plan.
+8. **Resources list.** In `build` mode, when RESOURCES_FILE is not `none` and the file exists, read it and note each site's Type, license summary, license page and Status. Do not fetch anything yet; fetching happens only for items you decide to borrow (Step 3B and Step 4). If the file is `none`, missing, or the mode is not `build`, write "no resources" in the plan. In `regress` mode always write "no resources".
+9. Load the learnings (rule 4.1.25): only entries tagged with a STORY_TAG or `all`, rules first, at most 15. List their IDs in the plan. In `regress` mode do not load them.
+10. Resolve MOTION, MOTION_LIBRARY, THREE_D, DESIGN_APPROVAL and BUDGET_MOTION_KB (section 2.2).
+11. **3D gate.** For TASK=`build`, if `THREE_D=ask`, complete read-only discovery and resolve the other settings, then stop using STOP condition 10 before writing implementation, design files or reports. Ask only this decision: should this premium site include real interactive 3D? The user must choose yes or no by updating THREE_D in `frontend-config.md` and rerunning. Do not infer yes from `MOTION=rich`, NOTES mentioning premium visuals, or skill availability. For TASK=`fix` or `audit`, `THREE_D=ask` resolves to `no`.
+12. **Existing project only:** run the Checks that already exist (install if `node_modules` is missing, lint, type check, unit tests, build, start) once to learn the baseline. Record what already fails, so you do not take the blame or "fix" it unasked.
+13. Write or update `{KNOWLEDGE_FILE}` (format in Appendix B).
+14. Print the resolved settings, one per line.
 
 ---
 
@@ -521,9 +591,10 @@ Follow rule 4.1.23:
 
 1. DESIGN_APPROVAL `off` and a brief exists: use the brief and the tokens. Go to 3B.
 2. No brief, existing project: derive a short draft brief from the existing look, mark it `status: derived (review me)`, record it under Assumptions. Go to 3B.
-3. DESIGN_APPROVAL `on` and DESIGN_CHOICE is `none`: write `{CONCEPT_FILE}` (Appendix E) with 2 or 3 concepts, each with a contrast check, then **STOP condition 9**. Do not start the plan.
+3. DESIGN_APPROVAL `on` and DESIGN_CHOICE is `none`: write `{CONCEPT_FILE}` (Appendix E) with 2 or 3 concepts, each with a contrast check, then **STOP condition 9**. Do not start the plan. When the taste notes hold a `like` entry, at least one concept must deliberately differ from the likes (rule 4.1.27) and is labelled "Variety concept".
 4. DESIGN_CHOICE is `A`, `B` or `C`: take that concept (apply any change written in NOTES and record it). If no brief exists, create `{DESIGN_BRIEF}` (Appendix D) with `status: approved` and create the tokens from the concept. Go to 3B.
 5. REFERENCE is an image of the finished design and approval is `auto`: derive the brief from it, mark it `derived from REFERENCE`, and skip the options.
+6. **Taste and variety (build mode, when taste notes were read).** Decide which taste entries you apply and which you set aside (an entry above it in the authority order wins). When no concept options are offered and the notes hold a `like` entry, choose the one Variety concept (rule 4.1.27). Write both decisions into plan section 3.
 
 ### 3B. Plan
 
@@ -539,10 +610,12 @@ What will exist when this is done, in two or three sentences.
 ## 2. Resolved Settings and Decisions
 | Setting | Value | How decided (config / detected / default) |
 |---|---|---|
-Then every decision taken, each with a one-line reason. List the learnings loaded (IDs).
+Then every decision taken, each with a one-line reason. List the learnings loaded (IDs), the number of taste entries read, and whether a resources list is in use.
 
 ## 3. Design and Motion
 - Design brief: path, status, version or date. Concept chosen (A, B, C or none) and any change requested.
+- Taste notes: entries applied and entries set aside, each with a one-line reason (omit when none were read).
+- Variety concept: the one deliberate choice that differs from the user's likes, and why it still fits the story, brief and accessibility (omit when there is no `like` entry).
 - MOTION level and how it was resolved. MOTION_LIBRARY and the reason for the choice. THREE_D decision (ask/yes/no), the user's approval, and whether the CloudAI-X skill was available. Budgets: BUDGET_PAGE_KB and BUDGET_MOTION_KB.
 - Motion table (omit when MOTION is `none`):
 | Effect | Element | Trigger | Technique or library | Duration and easing tokens | Reduced-motion behaviour | Mobile fallback | Est. KB |
@@ -556,7 +629,7 @@ Existing tokens reused; new tokens added (name, value, use). A table of every te
 |---|---|---|
 
 ## 6. Components
-A tree of components. For each: what it shows, its inputs, its states, the AC it serves, and whether it is new or reused.
+A tree of components. For each: what it shows, its inputs, its states, the AC it serves, and whether it is new, reused or borrowed (section 12).
 
 ## 7. Screens and States
 For each screen: layout at each viewport (short), exact visible text, loading / empty / error / success behaviour, keyboard behaviour, and the focus order.
@@ -581,6 +654,16 @@ Then the mock behaviour: sample data for `ok` and `empty`, and the message for `
 |---|---|
 
 ## 11. Needs Backend, Assumptions and Risks
+
+## 12. Borrowed Items
+Write "none" when nothing is borrowed or there is no resources list.
+| Item | Source URL | Type | License (as read) | Status | License page read this run (yes / not needed) | Attribution | Adaptation to tokens and accessibility | Extra packages |
+|---|---|---|---|---|---|---|---|---|
+
+## 13. Preview Variants
+Filled in Step 4B (omit in modes without a preview).
+| Variant | What differs from the earlier variants | Screenshots | Answer |
+|---|---|---|---|
 ````
 
 **Plan check before moving on (fix the plan; do not continue until all are true):**
@@ -592,6 +675,8 @@ Then the mock behaviour: sample data for `ok` and `empty`, and the message for `
 - No API that needs a secret key is called from the browser.
 - Every text/background pair meets A11Y_LEVEL (change the tokens until it does).
 - Every animation in the motion table has a reduced-motion behaviour and a mobile fallback, the estimated total fits BUDGET_MOTION_KB, at most one animation library is planned, and no 3D or smooth scroll is planned unless the story or NOTES names it.
+- Every borrowed item has Status VERIFIED, or PARTIAL with its license page read in this run; none is marked Pro, paid, premium or Beta; its license allows the use; its extra packages and motion needs fit rules 4.1.24 and Safety rule 5; and it is not a whole copied page.
+- When the taste notes hold a `like` entry, the plan names a Variety concept (or a concept option that differs), and no used taste entry conflicts with the story, DESIGN_SYSTEM, the brief, accessibility or a Safety rule.
 - Nothing in the plan breaks a Safety rule or touches a path in section 2.5.
 
 ---
@@ -600,29 +685,54 @@ Then the mock behaviour: sample data for `ok` and `empty`, and the message for `
 
 **Skip when TASK is `fix` or `audit`.**
 
-The four optional agent files (`frontend-design-planner`, `frontend-developer`, `frontend-visual-qa`, `frontend-reviewer`, all `*.agent.md`) may exist in `{AGENTS_DIR}`. If `frontend-developer.agent.md` exists, you may hand this step to it, passing the Requirements Summary, the plan, `{KNOWLEDGE_FILE}`, the loaded learnings and all of sections 3 and 4. You remain responsible for every other step, and the rules in this file win over the agent files. If a file is absent, or you cannot call agents, do the work yourself; nothing else is needed.
+The four optional agent files (`frontend-design-planner`, `frontend-developer`, `frontend-visual-qa`, `frontend-reviewer`, all `*.agent.md`) may exist in `{AGENTS_DIR}`. If `frontend-developer.agent.md` exists, you may hand this step to it, passing the Requirements Summary, the plan, `{KNOWLEDGE_FILE}`, the loaded learnings, the taste notes in use, the borrowed-items table and all of sections 3 and 4. You remain responsible for every other step, and the rules in this file win over the agent files. If a file is absent, or you cannot call agents, do the work yourself; nothing else is needed.
 
 Build in this order, running the Checks after each group (rule 4.2.8):
 
 1. **Project (empty project only).** Create the project files for the resolved stack (rule 4.1.18), the folder layout in Appendix C, `.gitignore`, `.env.example`, and a `README.md` with how to run it.
 2. **Tokens and base styles.** The tokens file (with duration and easing tokens); a minimal reset; base typography; the focus style; the reduced-motion rule; the theme switching when THEME is `both`.
 3. **Shared components** the plan lists (layout shell, navigation, buttons, form fields, messages, loading and empty and error blocks).
-4. **API layer and mocks** (rule 4.1.15), for every source in the plan. Include the `mock` switch.
-5. **Pages and screens**, in task order, with their exact text, all four screen states, and keyboard behaviour.
-6. **Motion module** (only when MOTION is not `none`): effects exactly as in the plan's motion table, in a separate module loaded lazily, with duration and easing read from tokens, a reduced-motion branch, cleanup, and a static fallback (rule 4.1.24).
-7. **Premium 3D experience** (only when `THREE_D=yes` and `MOTION_LEVEL=rich`): implement the scene described in the plan, using the CloudAI-X Three.js skill when discoverable. Lazy-load it after first paint or near the relevant section; do not load real-time 3D below 768px, with Save-Data, or when reduced motion is requested. Provide a visually polished static fallback that preserves the same information and layout. Dispose of geometries, materials, textures, renderers and event listeners, and cancel animation loops on unmount. Verify keyboard access to all controls; never make essential content available only inside the canvas.
-8. **Accessibility pass** over everything you built, against rule 4.1.7.
-9. **Responsive pass** at every VIEWPORT, against rule 4.1.8.
-10. **Unit tests** when UNIT_TESTS is `yes`: use the existing runner. If there is none and PACKAGE_MANAGER is not `none`, add the runner that matches the stack (Vitest for Vite-based stacks, the stack's default otherwise) as a dev dependency and record it. If PACKAGE_MANAGER is `none`, skip and record why. Test the logic (validation, formatting, services, mocks) and component behaviour (states, error messages), placed next to the source. NEVER under `tests/`, `e2e/`, `cypress/` or `playwright/`.
-11. **Environment example.** Update `.env.example` (rule 4.1.16) and add the `README.md` section.
+4. **Borrowed items** (only those in plan section 12; skip when it says "none"). For each item, in this order:
+   - **Fetch read-only** from the listed host only, using the method the site documents (its registry command or its source page), with non-interactive flags (rule 4.1.18). Fetch nothing that is not in the table. For a PARTIAL item, fetch and read its license file first and write what it says into section 12; if it does not allow the use, drop the item and build that part yourself (record it).
+   - **Adapt, do not paste.** Replace every hard-coded colour, size, spacing, radius, shadow, duration and easing with the project's tokens (rule 4.1.6). Bring it up to rules 4.1.7 to 4.1.9: semantics, labels, keyboard use, visible focus, contrast, responsive layout, and the four screen states. Make it follow MOTION_LEVEL, the single-library limit, reduced motion, lazy loading, the mobile fallback and the budgets (rule 4.1.24); give any WebGL or WebGPU part a polished static fallback.
+   - **Clean.** Remove trackers, analytics, remote images, fonts and scripts, hotlinks, demo data and unused code (Safety rules 6 and 7). Install a needed package only under Safety rule 5.
+   - **Mark.** Keep the license notice in each copied file as a short comment, and add the attribution the license asks for.
+   - **Look different.** Items of Type `inspiration`, and landing pages of any site, give only the structure of a section or a layout idea (rule 4.1.28). The design brief decides the look.
+5. **API layer and mocks** (rule 4.1.15), for every source in the plan. Include the `mock` switch.
+6. **Pages and screens**, in task order, with their exact text, all four screen states, and keyboard behaviour.
+7. **Motion module** (only when MOTION is not `none`): effects exactly as in the plan's motion table, in a separate module loaded lazily, with duration and easing read from tokens, a reduced-motion branch, cleanup, and a static fallback (rule 4.1.24).
+8. **Premium 3D experience** (only when `THREE_D=yes` and `MOTION_LEVEL=rich`): implement the scene described in the plan, using the CloudAI-X Three.js skill when discoverable. Lazy-load it after first paint or near the relevant section; do not load real-time 3D below 768px, with Save-Data, or when reduced motion is requested. Provide a visually polished static fallback that preserves the same information and layout. Dispose of geometries, materials, textures, renderers and event listeners, and cancel animation loops on unmount. Verify keyboard access to all controls; never make essential content available only inside the canvas.
+9. **Accessibility pass** over everything you built, against rule 4.1.7.
+10. **Responsive pass** at every VIEWPORT, against rule 4.1.8.
+11. **Unit tests** when UNIT_TESTS is `yes`: use the existing runner. If there is none and PACKAGE_MANAGER is not `none`, add the runner that matches the stack (Vitest for Vite-based stacks, the stack's default otherwise) as a dev dependency and record it. If PACKAGE_MANAGER is `none`, skip and record why. Test the logic (validation, formatting, services, mocks) and component behaviour (states, error messages), placed next to the source. NEVER under `tests/`, `e2e/`, `cypress/` or `playwright/`.
+12. **Environment example.** Update `.env.example` (rule 4.1.16) and add the `README.md` section.
 
-Record, per task: status, files created or changed, and any change to the Expected API (written back into the plan first). For motion also record library, version, licence and size.
+Record, per task: status, files created or changed, and any change to the Expected API (written back into the plan first). For motion also record library, version, licence and size. For each borrowed item record the files it created and the attribution given.
+
+### STEP 4B: PREVIEW  (stage: Build; `build` mode only)
+
+**Goal:** Let the user see the real page before the QA work starts, and let them ask for a different variant (rule 4.1.29).
+
+**Skip this step** (record the reason in the report and print `[STEP 4B] skipped`) when TASK is not `build`, SCREENSHOTS is `no`, or TASK is `regress`. **Mark it unverified** (print `[STEP 4B] unverified`, continue to Step 5, no stop) when the app cannot be started yet or no browser can be run; never describe a page you did not see.
+
+1. **Find the state.** List `{PREVIEW_DIR}`. N is the highest variant number found in `preview-v<N>-<WIDTH>.png`, or 0 if there is none.
+2. **Find the answer, if any.** If N is at least 1, the answer to the earlier preview is the user's chat message, or else PREVIEW_CHOICE. If N is 0 and PREVIEW_CHOICE is not `none`, ignore it and say so in one line. Save any like, dislike or advice the user typed with the answer to `{PREVIEW_NOTES}` (Appendix J), word for word, with the date and the variant number.
+   - `proceed`: write the answer in plan section 13 and go to Step 5. Do not rebuild.
+   - `V<n>`: if variant n is not the one currently in the code, rebuild it from its description in plan section 13 (replace the current variant, rule 4.1.29), run the Checks, and go to Step 5. If n is not a saved variant, print the second STOP 11 message again.
+   - `another`: if N is below MAX_PREVIEW_VARIANTS, go to item 3 and build variant N+1. If N is already MAX_PREVIEW_VARIANTS, print the second STOP 11 message and stop.
+   - No answer and N is at least 1: print the matching STOP 11 message again and stop.
+3. **Build the variant (only for N+1 after "another").** Rebuild the story's primary page and its sections as a visibly different variant: change composition (layout, section order or emphasis, type-scale use, imagery, motion within the level), not only colours; follow what the user typed about the earlier variant; stay inside the story, ACs, DESIGN_SYSTEM, the brief, accessibility and the budgets; take the other direction on the Variety concept if it helps. The new variant replaces the old one in the code; do not keep both. Run the Checks that apply (rule 4.2.8).
+4. **Prepare the tools.** Start the app (Step 5B, item 1) and make sure the QA toolbox exists (Step 5B, item 2; build it now if it does not, and Step 5B will reuse it).
+5. **Take the screenshots.** The story's primary page is the first row of plan section 5 (for an `html` project usually `index.html`). With Playwright, for each PREVIEW_VIEWPORT: open the page, wait for load, fonts and images, scroll through the page once so lazy and reveal content appears, scroll back, wait for motion to settle, and take a full-page screenshot to `{PREVIEW_DIR}preview-v<N>-<WIDTH>.png`. Never overwrite an earlier file.
+6. **Check the files.** Each file exists, is not empty, and is not a single flat colour. If one fails, retry once; if it still fails, say so plainly, mark the preview `unverified` and continue to Step 5.
+7. **Record.** Add or update the row for this variant in plan section 13: variant number, what differs from the earlier variants (one or two lines, enough to rebuild it), the screenshot names, answer pending.
+8. **Ask (STOP condition 11).** Print `[STEP 4B] preview <N> of {MAX_PREVIEW_VARIANTS} | outputs: <paths>`, then the matching STOP 11 message (the second message when N equals MAX_PREVIEW_VARIANTS). Stop. Step 5 does not start until the answer is given. On a re-run, Steps 1 to 4 are repeated quickly (the plan and the code already exist; update them in place, rule 4.1.20) and this step continues from item 1.
 
 ---
 
 ## STEP 5: VISUAL QA  (stage: Visual QA)
 
-**Goal:** Prove it works with tools and numbers, not by judging screenshots by eye. In `fix` mode limit this step to the affected pages. In `audit` mode this step is part of the audit flow and changes no tracked file.
+**Goal:** Prove it works with tools and numbers, not by judging screenshots by eye. In `fix` mode limit this step to the affected pages. In `audit` mode this step is part of the audit flow and changes no tracked file. In `build` mode this step starts only after Step 4B is finished (the user answered "proceed" or chose a variant, or the preview was skipped or unverified).
 
 ### 5A. Checks
 
@@ -633,7 +743,7 @@ Record, per task: status, files created or changed, and any change to the Expect
 ### 5B. Start and toolbox
 
 1. Start the app (START_COMMAND) and confirm it answers at APP_BASE_URL. If the port is busy, use the next free port and say so.
-2. Build the QA toolbox once in `{QA_DIR}` with its own `package.json`: Playwright (with its Chromium browser), `@axe-core/playwright`, Lighthouse, `pixelmatch` and `pngjs`. Never add these to the project's `package.json`. Append `{QA_DIR}node_modules/` and `{QA_DIR}out/` to `.gitignore`. Write one script (`{QA_DIR}qa.mjs`) that takes the base address, the viewports and the page list and writes results as JSON to `{QA_DIR}out/`. Reuse it on later runs.
+2. Build the QA toolbox once in `{QA_DIR}` with its own `package.json`: Playwright (with its Chromium browser), `@axe-core/playwright`, Lighthouse, `pixelmatch` and `pngjs`. Never add these to the project's `package.json`. Append `{QA_DIR}node_modules/` and `{QA_DIR}out/` to `.gitignore`. Write one script (`{QA_DIR}qa.mjs`) that takes the base address, the viewports and the page list and writes results as JSON to `{QA_DIR}out/`. Reuse it on later runs, and reuse the toolbox that Step 4B may already have built.
 3. Serve the production build locally for G4 and G5 (`{PACKAGE_MANAGER} run preview` if the script exists, otherwise `npx serve <build folder> -l 4173`). A dev server gives meaningless performance scores. Plain `html` projects use the start command.
 4. If a tool or browser cannot run (no network, no browser), mark the gates that need it `unverified`, fall back to fetching each page with a command-line request, and continue. Never invent a result.
 
@@ -663,6 +773,8 @@ Motion checks (when MOTION is not `none`):
 - **3D.** The canvas stops rendering when offscreen or when the tab is hidden; a missing WebGL context shows the fallback; the canvas is decorative or labelled and never traps focus.
 - **Contrast** in each theme: the plan's contrast table matches the real computed colours.
 
+Borrowed-item check (when plan section 12 lists items): no request goes to a host of the resources list or to any host outside EXTERNAL_RESOURCES at runtime (G1), and each borrowed item passes G3, G7, G8 and G11 like the rest of the page.
+
 ### 5D. Fix rounds (capped)
 
 1. One round = fix everything that failed in one editing pass, then re-run only the failed gates plus G1 and the Checks.
@@ -671,7 +783,7 @@ Motion checks (when MOTION is not `none`):
 
 ### 5E. After the last round
 
-1. Save one screenshot per page per viewport (and theme) to `{SHOT_DIR}` (rule 4.2.7) when SCREENSHOTS is `yes`.
+1. Save one screenshot per page per viewport (and theme) to `{SHOT_DIR}` (rule 4.2.7) when SCREENSHOTS is `yes`. The preview screenshots stay in `{PREVIEW_DIR}`.
 2. Update the baseline: if the outcome is not INCOMPLETE and no High issue is open, copy the screenshots of the pages in the story's scope to `{BASELINE_DIR}` and record that in the report. Never update the baseline in `audit` mode, and in `fix` mode only for the affected pages.
 3. Record the build output size (total and the largest files), the Lighthouse medians, the weights and the visual differences.
 4. Update `{KNOWLEDGE_FILE}` with the new components, routes, tokens, motion modules and conventions. Stop the app if you started it.
@@ -686,11 +798,14 @@ Motion checks (when MOTION is not `none`):
 2. Spot checks: no hard-coded colour, size, duration or easing outside tokens; no TODO, lorem ipsum or commented-out code; no leftover `console.log`; no outside host outside EXTERNAL_RESOURCES; no secret; no new dependency without a recorded reason.
 3. Design: the result follows the brief's do and don't, and the palette matches the approved concept.
 4. Motion (when MOTION is not `none`): the effects built are exactly the effects in the plan; the MOTION level was respected; at most one animation library is installed, pinned by the lock file, loaded only where used and imported by plugin; each effect has reduced-motion handling, cleanup and a fallback.
-5. Fix only a one-line problem, then re-run the Checks. Anything bigger goes under "Not done".
+5. Borrowed items (when plan section 12 lists items): each one in the code is in the table and nothing else was borrowed; each file carries its license notice; the attribution the license asks for is present; each item uses tokens, not its own hard-coded values; no whole page or section order was copied.
+6. Taste and preview (build mode): the Variety concept, if the plan names one, is in the result and labelled; the preview variant in the code is the one the user chose; the answers are in `{PREVIEW_NOTES}`.
+7. Fix only a one-line problem, then re-run the Checks. Anything bigger goes under "Not done".
 
-### 6B. Learnings (rule 4.1.25)
+### 6B. Learnings and taste notes (rules 4.1.25 and 4.1.27)
 
-Create `{LEARNINGS_DIR}` and its files if they do not exist. For each distinct failure of this run, write or update an entry by the counter rules; promote at `count` 3; apply the caps and the expiry; refuse contradictions and write a proposal instead. Write a proposal for any general rule or worsening trend. Not in `regress` mode.
+1. **Learnings.** Create `{LEARNINGS_DIR}` and its files if they do not exist. For each distinct failure of this run, write or update an entry by the counter rules; promote at `count` 3; apply the caps and the expiry; refuse contradictions and write a proposal instead. Write a proposal for any general rule or worsening trend. Not in `regress` mode.
+2. **Taste notes** (`build` and `fix` mode, TASTE_FILE not `none`; never in `regress`). Collect what the user typed in this run: chat messages, NOTES, and `{PREVIEW_NOTES}`. Keep only lasting preferences or directions, not one-off change requests (rule 4.1.27). If there is nothing, write nothing: silence creates no entry and nothing is inferred. Otherwise create the file from Appendix I if it does not exist, remove expired entries, add or update entries (same meaning: update the date; opposite meaning: the newer replaces the older), and then cut the oldest entries until the file is at or under TASTE_MAX_LINES lines. List what was added, updated and removed (the entry text only) in the report.
 
 ### 6C. Metrics
 
@@ -775,6 +890,16 @@ Exact commands to install, start and open the app, and how to switch between moc
 
 ## 16. Setup You Must Do (only if API_MODE is live)
 The environment variable names to fill in `.env` (names only, never values) and what each must point to.
+
+## 17. Third-Party Components (write "none" when nothing was borrowed)
+| Item | Source URL | License | Status | Attribution used (and where) | Files | Adapted to tokens and accessibility |
+|---|---|---|---|---|---|---|
+Also list items you looked at and dropped, with the reason (license not allowing the use, Pro or paid, no fallback, library not allowed). Suggestions for the resources list go in section 13 as proposals.
+
+## 18. Preview and Taste Notes (build mode)
+Preview: variants shown <n> of {MAX_PREVIEW_VARIANTS} | variant kept <V<n>> | screenshots <paths in {PREVIEW_DIR}> | status verified / unverified / skipped (reason).
+Variety concept: <the choice, or "none (no like entries)">.
+Taste notes: entries used <n>, set aside <n> (with reasons in the plan); changes to {TASTE_FILE}: added <text>, updated <text>, removed <text>, or "nothing typed, no change".
 ````
 
 Every number comes from real command output, never an estimate. Use tables, not paragraphs. Link to the plan instead of repeating it.
@@ -793,7 +918,7 @@ Follow GIT_MODE:
    - **Repository with commits:** in `push` mode pull the latest BASE_BRANCH; create GIT_BRANCH from it. Leave the user's unrelated uncommitted changes alone.
    - **GIT_BRANCH already exists:** check it out and add a new commit on top.
    - **Conflict or rejected push:** STOP condition 7.
-2. **Stage only** the files you created or changed in this run (section 2.4): source, tokens, plan, concept file, report, knowledge file, learning files, proposals, screenshots, baseline images and a newly created design brief. Never `git add .`. Never stage anything from section 2.5 or 2.6.
+2. **Stage only** the files you created or changed in this run (section 2.4): source, tokens, plan, concept file, report, knowledge file, learning files, proposals, screenshots, the preview screenshots and `{PREVIEW_NOTES}`, `{TASTE_FILE}` when it changed, baseline images and a newly created design brief. Never `git add .`. Never stage anything from section 2.5 or 2.6.
 3. **Check before committing:** run `git status` and read the list; search the staged files for secrets (section 3, rule 1); confirm nothing from section 2.5 or 2.6 is staged.
 4. **Commit** with this message:
 
@@ -956,6 +1081,8 @@ Pick one by setting DESIGN_CHOICE in frontend-config.md. Put changes you want in
 ...
 ```
 
+When the taste notes hold a `like` entry, one option is labelled "Variety concept" and says in one line how it differs from the likes (rule 4.1.27).
+
 ## APPENDIX F: LEARNING FILE FORMATS
 
 **`{FAILURES_FILE}` and `{LESSONS_FILE}`** (each under 120 lines, entries at most 4 lines):
@@ -1008,6 +1135,47 @@ After you apply it: raise WORKFLOW_VERSION and run TASK = regress.
 
 Use these tags in learning entries and for STORY_TAGS: `all`, `forms`, `nav`, `layout`, `data`, `dashboard`, `auth`, `content`, `images`, `motion`, `a11y`, `theme`, `perf`, `states`.
 
+## APPENDIX I: TASTE NOTES FORMAT (`{TASTE_FILE}`)
+
+One merged file, at or under TASTE_MAX_LINES lines including the header. The workflow writes it only from what the user typed (rule 4.1.27). The user may also edit it by hand.
+
+```markdown
+# Taste notes
+Format: - [project | YYYY-MM-DD] like|advice: text   (older than TASTE_EXPIRY_DAYS is removed)
+- [shop-site | 2026-10-18] like: likes large serif headings on a plain light background
+- [shop-site | 2026-10-18] like: dislikes image carousels
+- [portfolio | 2026-10-27] advice: use more whitespace between sections
+```
+
+`like` = something the user likes or dislikes (a leaning). `advice` = a direction to follow. One line per entry, at most 200 characters.
+
+## APPENDIX J: PREVIEW NOTES FORMAT (`{PREVIEW_NOTES}`)
+
+One file per story, next to the preview screenshots in `{PREVIEW_DIR}`. The workflow appends to it; it never rewrites earlier entries.
+
+```markdown
+# Preview notes: {STORY_ID} - {FEATURE_NAME}
+## v1 | 2026-10-27
+Shown: preview-v1-1280.png, preview-v1-390.png
+User said (word for word): <the text the user typed with the answer, or "nothing typed">
+Answer: proceed | another | V<n>
+## v2 | 2026-10-27
+...
+```
+
+## APPENDIX K: RESOURCES LIST (`{RESOURCES_FILE}`, read-only for the workflow)
+
+The user keeps this file. Each site has a Type (`components`, `library`, `tool`, `inspiration`), a license summary, the license page and a Status:
+
+| Status | Meaning | Reuse |
+|---|---|---|
+| VERIFIED | License read on the site's own page or official repository | Yes, within the license, for items marked free |
+| PARTIAL | License known from secondary sources | Only after the run reads the item's license file read-only and records it in plan section 12 |
+| REFERENCE ONLY | No reuse license applies | Never; structure and layout ideas only |
+| UNVERIFIED | Not checked | Never |
+
+Anything marked Pro, paid, premium or Beta is never reused, whatever the Status.
+
 ---
 
 ## COMPLETION CRITERIA
@@ -1016,8 +1184,11 @@ Use these tags in learning entries and for STORY_TAGS: `all`, `forms`, `nav`, `l
 - [ ] Every in-scope AC has a finished task and a line of evidence (`build`), or every listed defect is fixed or explained (`fix`), or every review area is covered (`audit`)
 - [ ] All Checks and QA gates were run (or marked unverified with the reason) and the results are in the report
 - [ ] QA fix rounds did not exceed QA_FIX_ROUNDS
-- [ ] The metrics line is appended and the learning files are within their caps
-- [ ] No secret, no `.env` and no off-limits file is staged or changed; this file, the config and an existing brief are untouched
+- [ ] In `build` mode the preview was shown and answered, or is recorded as skipped or unverified with the reason; no more than MAX_PREVIEW_VARIANTS variants were made
+- [ ] Every borrowed item is in plan section 12 and report section 17 with license, Status and attribution; none is Pro, paid, premium, Beta, REFERENCE ONLY or UNVERIFIED
+- [ ] The metrics line is appended and the learning files and the taste notes are within their caps
+- [ ] The taste notes hold only what the user typed; silence created no entry
+- [ ] No secret, no `.env` and no off-limits file is staged or changed; this file, the config, the resources list and an existing brief are untouched
 - [ ] The work is committed (and pushed in `push` mode), and the commit SHA is printed (unless GIT_MODE is `none`)
 
 ## FINAL RESPONSE FORMAT
@@ -1029,6 +1200,8 @@ Outcome: <DONE | DONE WITH NOTES | INCOMPLETE>
 Tasks: <done>/<total> | ACs covered: <x>/<y> | Checks: <passed>/<run> | QA gates: <passed>/<run> (rounds <n>/{QA_FIX_ROUNDS})
 Screens verified: <pages> x <viewports> | Visual checks: <verified | unverified>
 Design: <brief status> | Motion: <level> (<library>) | Lighthouse perf/a11y: <p>/<a>
+Preview: <variant kept, n of {MAX_PREVIEW_VARIANTS} | skipped | unverified> | Variety concept: <short text or none>
+Borrowed items: <n> (see report section 17) | Taste notes changed: <added/updated/removed counts or none>
 Files: <created> created, <changed> changed | Dependencies added: <n>
 Needs backend: <count> (see report section 11) | Assumptions made: <count> | Proposals written: <count>
 Artifacts: <file paths>
@@ -1042,4 +1215,4 @@ For `evaluate` print the path of the evaluation report and the proposals written
 
 ## START
 
-Read `frontend-config.md` (section 2.1), then begin at STEP 1 and continue in order through STEP 7 (or follow section 5 when TASK is `fix`, `audit`, `evaluate` or `regress`).
+Read `frontend-config.md` (section 2.1), then begin at STEP 1 and continue in order through STEP 7, including STEP 4B in `build` mode (or follow section 5 when TASK is `fix`, `audit`, `evaluate` or `regress`).

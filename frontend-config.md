@@ -96,3 +96,16 @@ KNOWLEDGE_FILE     = frontend-knowledge.md
 
 FRONTEND_DIR       = auto
 AGENTS_DIR         = .github/agents
+
+
+# Taste notes (items 1 to 5)
+TASTE_FILE = design/taste-notes.md
+TASTE_MAX_LINES = 60
+TASTE_EXPIRY_DAYS = 90
+
+# Preview (items 6 and 7)
+MAX_PREVIEW_VARIANTS = 3
+PREVIEW_VIEWPORTS = 1280x800, 390x844
+
+# Free component resources (item 8)
+RESOURCES_FILE = design/resources.md   # or: none
