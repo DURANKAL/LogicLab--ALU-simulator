@@ -1,6 +1,5 @@
 import { mountHome } from "./home.js";
 import { mountSimulator } from "./simulator.js";
-import "../css/styles.css";
 
 const homePage = document.querySelector("#home-page");
 const simulatorPage = document.querySelector("#simulator-page");
