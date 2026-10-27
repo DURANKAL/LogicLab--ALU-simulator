@@ -920,7 +920,7 @@ input {
 
 .simulator-grid {
   display: grid;
-  grid-template-columns: minmax(15rem, 0.7fr) minmax(0, 1.25fr) minmax(13rem, 0.6fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: start;
   gap: var(--space-3);
   margin-top: var(--space-4);
@@ -928,20 +928,28 @@ input {
 
 .input-stack {
   display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+  align-items: center;
   gap: var(--space-4);
   padding: var(--space-4);
   border: var(--border-thin);
   background: var(--color-panel);
 }
 
-.input-stack .bit-switch {
-  width: clamp(2.4rem, 4vw, 3rem);
+.input-stack .operation-field {
+  margin: 0;
+  padding: 0 0 0 var(--space-4);
+  border-top: 0;
+  border-left: var(--border-thin);
 }
 
-.input-stack .operation-field {
-  margin-top: 0;
-  padding-top: var(--space-3);
-  border-top: var(--border-thin);
+.input-stack .operation-input {
+  width: 100%;
+}
+
+.input-stack .bit-switch {
+  width: clamp(2.4rem, 4vw, 3rem);
 }
 
 .circuit-panel,
@@ -953,6 +961,7 @@ input {
 }
 
 .circuit-panel {
+  grid-column: 1;
   padding: var(--space-4);
 }
 
@@ -1088,6 +1097,7 @@ input {
 }
 
 .output-panel {
+  grid-column: 1 / -1;
   padding: var(--space-4);
 }
 
@@ -1129,8 +1139,12 @@ input {
 }
 
 .trace-panel {
-  grid-column: 2 / -1;
+  grid-column: 1;
   padding: var(--space-4);
+}
+
+.truth-panel {
+  grid-column: 2;
 }
 
 .trace-panel h2 {
@@ -1237,7 +1251,8 @@ input {
 }
 
 .walkthrough-panel {
-  grid-column: 1 / -1;
+  grid-column: 2;
+  align-self: stretch;
   padding: var(--space-4);
   border: var(--border-thin);
   background: var(--color-panel);
@@ -1441,37 +1456,21 @@ input {
 
 }
 
-@media (min-width: 48rem) and (max-width: 69.99rem) {
+@media (min-width: 48rem) and (max-width: 63.99rem) {
   .simulator-grid {
-    grid-template-columns: minmax(15rem, 0.68fr) minmax(0, 1.3fr);
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .input-stack {
-    grid-column: 1 / -1;
-    grid-template-columns: 1fr 1fr auto;
-    align-items: center;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(8rem, 0.6fr);
   }
 
-  .input-stack .operation-field {
-    display: grid;
-    gap: var(--space-2);
-    margin: 0;
-    padding: 0;
-    border: 0;
-  }
-
-  .input-stack .operation-input {
-    width: 100%;
-  }
-
-  .output-panel {
+  .circuit-panel,
+  .walkthrough-panel,
+  .output-panel,
+  .trace-panel,
+  .truth-panel {
     grid-column: 1;
-    grid-row: 2;
-  }
-
-  .circuit-panel {
-    grid-column: 2;
-    grid-row: 2 / span 2;
   }
 }
 
