@@ -6,6 +6,7 @@ const simulatorPage = document.querySelector("#simulator-page");
 const navigation = document.querySelector(".site-header nav");
 let homeMounted = false;
 let simulatorMounted = false;
+let simulatorController = null;
 
 function setNavigation(route, hash) {
   for (const link of navigation.querySelectorAll("a[data-route]")) {
@@ -33,6 +34,7 @@ function renderRoute({ focus = false } = {}) {
   homePage.hidden = isSimulator;
   simulatorPage.hidden = !isSimulator;
   const route = isSimulator ? "simulator" : hash === "#about" ? "about" : "home";
+  if (!isSimulator) simulatorController?.pauseWalkthrough();
   document.title = isSimulator
     ? "4-bit ALU Simulator — LogicLab"
     : route === "about"
@@ -41,7 +43,7 @@ function renderRoute({ focus = false } = {}) {
   setNavigation(route, hash);
 
   if (isSimulator && !simulatorMounted) {
-    mountSimulator(simulatorPage);
+    simulatorController = mountSimulator(simulatorPage);
     simulatorMounted = true;
   }
   if (!isSimulator && !homeMounted) {

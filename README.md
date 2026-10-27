@@ -21,4 +21,6 @@ Live Server serves static files and may not rewrite `/simulator` to `index.html`
 
 Run the testable ALU engine with `npm test` and create a production build with `npm run build`.
 
-The optional Three.js hero is loaded only on eligible desktop viewports when reduced motion and Save-Data are disabled. The simulator itself uses an accessible SVG circuit and works independently of WebGL.
+The simulator includes a seven-step guided circuit walkthrough with play, pause, replay, step navigation, and timeline scrubbing. Its narration and highlighted signal paths are driven by the current inputs and operation, including full-adder carry propagation.
+
+The optional Three.js hero is loaded only on eligible desktop viewports when reduced motion and Save-Data are disabled. The simulator itself uses an accessible SVG circuit and works independently of WebGL; its CSS transitions respect reduced-motion preferences.

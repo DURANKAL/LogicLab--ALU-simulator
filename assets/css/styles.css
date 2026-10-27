@@ -1236,6 +1236,153 @@ input {
   font-weight: 500;
 }
 
+.walkthrough-panel {
+  grid-column: 1 / -1;
+  padding: var(--space-4);
+  border: var(--border-thin);
+  background: var(--color-panel);
+}
+
+.walkthrough-heading,
+.walkthrough-step {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+}
+
+.walkthrough-heading {
+  padding-bottom: var(--space-3);
+  border-bottom: var(--border-thin);
+}
+
+.walkthrough-heading .mono-label,
+.walkthrough-step .mono-label {
+  color: var(--color-signal);
+}
+
+.walkthrough-heading h2 {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-lg);
+}
+
+.walkthrough-state {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.walkthrough-step {
+  min-height: 7rem;
+  align-items: center;
+  padding: var(--space-4) 0;
+}
+
+.walkthrough-step h3 {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-base);
+  font-weight: 600;
+}
+
+.walkthrough-step > p {
+  max-width: 46rem;
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.walkthrough-controls {
+  display: grid;
+  gap: var(--space-3);
+  padding-top: var(--space-3);
+  border-top: var(--border-thin);
+}
+
+.walkthrough-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.walkthrough-actions .button {
+  min-height: 2.75rem;
+  gap: var(--space-2);
+  padding: 0 var(--space-3);
+  font-size: var(--text-sm);
+}
+
+.walkthrough-actions .button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  transform: none;
+}
+
+.walkthrough-scrubber {
+  display: grid;
+  grid-template-columns: auto minmax(4rem, 1fr) auto;
+  align-items: center;
+  gap: var(--space-3);
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.walkthrough-scrubber input {
+  width: 100%;
+  accent-color: var(--color-signal);
+  cursor: pointer;
+}
+
+.walkthrough-scrubber input:disabled {
+  cursor: not-allowed;
+}
+
+.walkthrough-scrubber output {
+  min-width: 6rem;
+  color: var(--color-text);
+  text-align: right;
+}
+
+.simulator-circuit .circuit-row {
+  transition: opacity var(--duration-base) var(--ease-out);
+}
+
+.simulator-circuit svg[data-walkthrough-active="true"] .circuit-row {
+  opacity: 0.22;
+}
+
+.simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="inputs"],
+.simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="revealed"] {
+  opacity: 0.7;
+}
+
+.simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="active"] {
+  opacity: 1;
+}
+
+.simulator-circuit svg[data-walkthrough-active="true"] .circuit-wire {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset var(--duration-slow) var(--ease-out), stroke var(--duration-fast) var(--ease-out);
+}
+
+.simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="inputs"] .circuit-wire-input,
+.simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="active"] .circuit-wire,
+.simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="revealed"] .circuit-wire {
+  stroke-dashoffset: 0;
+}
+
+.simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="active"] .circuit-component rect,
+.simulator-circuit .circuit-operation-selector.is-guide-active rect {
+  fill: var(--color-signal);
+  stroke: var(--color-text);
+  stroke-width: 3;
+}
+
+.simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="active"] .circuit-component text,
+.simulator-circuit .circuit-operation-selector.is-guide-active text {
+  fill: var(--color-ink);
+}
+
 .runtime-error {
   position: fixed;
   z-index: var(--layer-overlay);
@@ -1614,7 +1761,8 @@ input {
   .output-panel,
   .circuit-panel,
   .trace-panel,
-  .truth-panel {
+  .truth-panel,
+  .walkthrough-panel {
     grid-column: 1;
     grid-row: auto;
   }
@@ -1639,6 +1787,42 @@ input {
 
   .trace-step strong {
     font-size: var(--text-xs);
+  }
+
+  .walkthrough-panel {
+    padding: var(--space-3);
+  }
+
+  .walkthrough-heading,
+  .walkthrough-step {
+    flex-direction: column;
+    gap: var(--space-2);
+  }
+
+  .walkthrough-step {
+    min-height: 0;
+    align-items: flex-start;
+  }
+
+  .walkthrough-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .walkthrough-actions .button {
+    width: 100%;
+    min-width: 0;
+    padding-right: var(--space-2);
+    padding-left: var(--space-2);
+  }
+
+  .walkthrough-scrubber {
+    grid-template-columns: 1fr auto;
+  }
+
+  .walkthrough-scrubber input {
+    grid-column: 1 / -1;
+    grid-row: 2;
   }
 }
 

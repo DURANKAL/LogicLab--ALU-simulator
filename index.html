@@ -169,6 +169,25 @@
           </section>
           <section class="trace-panel" aria-labelledby="trace-title"><div class="panel-topline"><span class="mono-label">STEP BY STEP</span><span class="trace-index">01 — 04</span></div><h2 id="trace-title">Execution Trace</h2><div class="trace-content"></div></section>
           <details class="truth-panel"><summary>Truth Table <span aria-hidden="true">＋</span></summary><div class="truth-content"></div></details>
+          <section class="walkthrough-panel" aria-labelledby="walkthrough-title">
+            <div class="walkthrough-heading">
+              <div><p class="mono-label">GUIDED CIRCUIT / 07 STEPS</p><h2 id="walkthrough-title">Watch the signal move.</h2></div>
+              <span class="walkthrough-state" data-walkthrough-state>READY</span>
+            </div>
+            <div class="walkthrough-step" aria-live="polite" aria-atomic="true">
+              <div><p class="mono-label" data-walkthrough-index>STEP 01 / 07</p><h3 data-walkthrough-title>Inputs enter the circuit</h3></div>
+              <p data-walkthrough-description>Two four-bit values enter the ALU and travel toward the selected operation.</p>
+            </div>
+            <div class="walkthrough-controls">
+              <div class="walkthrough-actions">
+                <button class="button button-quiet" type="button" data-walkthrough-previous aria-label="Previous walkthrough step">Previous</button>
+                <button class="button button-primary" type="button" data-walkthrough-play aria-pressed="false">Play walkthrough</button>
+                <button class="button button-quiet" type="button" data-walkthrough-next aria-label="Next walkthrough step">Next</button>
+                <button class="button button-quiet" type="button" data-walkthrough-replay>Replay</button>
+              </div>
+              <label class="walkthrough-scrubber"><span>Progress</span><input type="range" min="0" max="17.5" step="0.1" value="0" data-walkthrough-range aria-label="Walkthrough position"><output data-walkthrough-position>0.0 / 17.5 s</output></label>
+            </div>
+          </section>
         </div>
       </section>
     </main>
