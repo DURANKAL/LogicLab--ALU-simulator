@@ -1,4 +1,4 @@
-import { getTruthTable } from "./logic/alu.js";
+import { getTruthTable, OPERATIONS } from "./logic/alu.js";
 import { mountSimulationControls } from "./controls.js";
 
 const componentDescriptions = {
@@ -23,6 +23,7 @@ const componentDescriptions = {
 };
 
 function circuitMarkup(result) {
+  const nextOperation = OPERATIONS[(OPERATIONS.indexOf(result.operation) + 1) % OPERATIONS.length];
   const rows = result.bitSteps.map((step, index) => {
     const y = 66 + index * 48;
     const aBit = result.binaryA[index];
@@ -38,7 +39,7 @@ function circuitMarkup(result) {
         <text class="circuit-io-label" x="9" y="${y + 13}">B${step.position} · ${bBit}</text>
         <path class="circuit-wire" data-state="${aBit}" d="M64 ${y - 8}H164V${y - 2}H238" />
         <path class="circuit-wire" data-state="${bBit}" d="M64 ${y + 10}H164V${y + 2}H238" />
-        <g class="circuit-component" tabindex="0" role="button" data-component="${kind}" aria-label="${step.position === 0 ? "Most significant" : step.position === 3 ? "Least significant" : "Bit"} ${step.position}, ${operation} · ${step.result}, ${kind === "adder" ? "full adder" : "logic gate"}">
+        <g class="circuit-component" tabindex="0" role="button" data-component="${kind}" aria-label="${step.position === 3 ? "Most significant" : step.position === 0 ? "Least significant" : "Bit"} ${step.position}, ${operation} · ${step.result}, ${kind === "adder" ? "full adder" : "logic gate"}">
           <rect x="238" y="${y - 19}" width="104" height="37" />
           <text x="290" y="${y + 5}">${operation} · ${step.result}</text>
         </g>
@@ -49,17 +50,16 @@ function circuitMarkup(result) {
   }).join("");
 
   return `
-    <svg viewBox="0 0 530 250" role="group" aria-labelledby="circuit-title" aria-describedby="circuit-description">
+    <svg viewBox="0 0 530 286" role="group" aria-labelledby="circuit-title" aria-describedby="circuit-description">
       <title id="circuit-title">${result.operation} circuit for ${result.binaryA} and ${result.binaryB}</title>
       <desc id="circuit-description">Each input bit pair passes through the selected ${result.operation} circuit and produces ${result.binary}. The signal labels show the actual evaluated bit values.</desc>
       <rect class="circuit-chip" x="223" y="28" width="137" height="204" />
       <text class="circuit-io-label" x="10" y="32">A / B</text>
       <text class="circuit-io-label" x="451" y="32">OUTPUT</text>
       ${rows}
-      <text id="circuit-description" class="circuit-io-label" x="10" y="247">Signal values are computed from the current inputs and operation.</text>
-      <g class="circuit-component" tabindex="0" role="button" data-component="selector" aria-label="Operation selector, ${result.operation} SELECT">
-        <rect x="393" y="216" width="110" height="25" />
-        <text x="448" y="233">${result.operation} SELECT</text>
+      <g class="circuit-component circuit-operation-selector" tabindex="0" role="button" data-component="selector" aria-label="${result.operation} → ${nextOperation}; change operation">
+        <rect x="210" y="252" width="110" height="25" />
+        <text x="265" y="269">${result.operation} → ${nextOperation}</text>
       </g>
     </svg>`;
 }
@@ -134,7 +134,15 @@ export function mountSimulator(root) {
   const circuit = root.querySelector(".simulator-circuit");
   const inspect = (component) => {
     const kind = component?.dataset.component;
-    if (kind && currentResult) renderInspection(root.querySelector(".circuit-inspection"), kind, currentResult);
+    if (!kind || !currentResult) return;
+    if (kind === "selector") {
+      const operationInput = root.querySelector(".operation-input");
+      const currentIndex = OPERATIONS.indexOf(operationInput.value);
+      operationInput.value = OPERATIONS[(currentIndex + 1) % OPERATIONS.length];
+      operationInput.dispatchEvent(new Event("change", { bubbles: true }));
+      root.querySelector(".circuit-operation-selector")?.focus();
+    }
+    renderInspection(root.querySelector(".circuit-inspection"), kind, currentResult);
   };
   circuit.addEventListener("click", (event) => inspect(event.target.closest("[data-component]")));
   circuit.addEventListener("keydown", (event) => {

@@ -1,31 +1,41 @@
-# Frontend knowledge: immersive-task-manager
-Last updated: 2026-10-21 by story US-001
+# Frontend knowledge: logiclab
+Last updated: 2026-10-27 by story US-001
 
 ## Stack
-Stack: html | Styling: css | Language: javascript | Package manager: none | Theme: dark
-Design brief: design/design-brief.md, user-directed Doing Club visual system | Tokens: assets/css/tokens.css | Motion library: native CSS / Web Animations API
+Stack: html | Styling: css | Language: javascript | Package manager: npm (Vite and Three.js) | Theme: dark
+Design brief: `design/design-brief.md` is an existing task-manager brief; protected from changes. The LogicLab US-001 story and configured NOTES are the visual authority for this feature.
+Tokens: `assets/css/tokens.css` | Motion: native CSS/IntersectionObserver and lazily loaded Three.js for the approved 3D hero.
 
 ## Structure
-- index.html: semantic task dashboard.
-- assets/css/: CSS design tokens, base styles, and responsive plum-and-citrus dashboard styles.
-- assets/js/: in-memory task state, validation, and lazily loaded task motion.
-- design/: approved project design brief.
-- frontend-plans/: concepts and implementation plan.
-- frontend-reports/: report, QA toolbox, screenshots, and accepted baselines.
+- `index.html`: the SPA document; `/` is the homepage and `/simulator` is the ALU workbench.
+- `assets/css/`: design tokens, accessible base styles, and responsive layouts.
+- `assets/js/logic/alu.js`: pure shared four-bit ALU calculations and validation.
+- `assets/js/logic/alu.test.js`: Node built-in unit tests.
+- `assets/js/home.js`, `assets/js/simulator.js`: route-specific UI behavior.
+- `assets/js/motion/hero-scene.js`: optional lazy Three.js hero scene, with static fallback.
+- `frontend-plans/`: story plans.
+- `frontend-reports/`: visual QA, screenshots and story reports.
 
 ## Commands
-- install: none | start: python -m http.server 8080 --bind 127.0.0.1 | build: none | preview: python -m http.server 8080 --bind 127.0.0.1 | lint: none | test: skipped (plain HTML, package manager none)
-- address: http://localhost:8080
+- install: `npm install`
+- start: `npm run dev -- --host 127.0.0.1`
+- build: `npm run build`
+- lint/type check: none configured
+- test: `npm test` (Node built-in test runner)
+- address: `http://127.0.0.1:5173`
 
 ## Conventions
-- Use semantic HTML, CSS tokens, and vanilla JavaScript; keep task data in memory.
-- Flat deep-plum canvas, citrus accents, bold sans-serif display type, and no glassmorphism, blur, or gradients.
-- Use native opacity and transform motion; load the motion module only at widths of 768px and above and when reduced motion and Save-Data are off.
-- Use `?mock=slow`, `?mock=empty`, and `?mock=error` for local loading, empty, and error QA states.
-- Tasks do not persist across reloads; no backend or external runtime asset is used.
+- No UI framework; semantic HTML, CSS custom-property tokens, and vanilla JavaScript modules.
+- ALU math and input parsing stay presentation-independent; homepage preview and simulator share the same engine.
+- The four-bit sum wraps modulo 16 and exposes carry-out separately.
+- Keep all simulation client-side and in memory; do not introduce accounts, APIs, persistence, or extra routes.
+- The scene is optional, dynamically imported, and disabled for reduced motion, Save-Data, and viewports below 768px. Static SVG preserves content.
+- No external runtime fonts, images, scripts, or API calls.
 
 ## Pages and Components
-- `/`: one-page dashboard with accessible task form, in-memory list, completion/deletion controls, empty/loading/error states, and reduced-motion handling.
+- `/`: seven-section LogicLab homepage with accessible navigation and an interactive ALU preview.
+- `/simulator`: operation controls, four-bit inputs, circuit visualization, result, truth table, execution trace, and reset.
 
 ## Baseline
-- No application build, lint, type-check, or unit-test runner is configured; browser QA uses isolated tools under `frontend-reports/qa/`.
+- No app source, package manifest, build, lint, type-check, or application test runner existed before this story.
+- Node, npm, Python, and browser-test packages are available in the workspace.

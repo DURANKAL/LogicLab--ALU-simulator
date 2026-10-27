@@ -96,6 +96,23 @@ async function collectPage(page, route, viewport, screenshot = false) {
     visibleSections: [...document.querySelectorAll("main section")].filter((section) => section.getClientRects().length > 0).length,
     revealedSections: [...document.querySelectorAll(".reveal")].filter((section) => Number(getComputedStyle(section).opacity) >= 0.99).length,
     totalRevealSections: document.querySelectorAll(".reveal").length,
+    overlappingControls: (() => {
+      const controls = [...document.querySelectorAll("main button, main [role='button'], main input, main select, main summary")]
+        .filter((element) => element.getClientRects().length > 0)
+        .map((element) => ({ element, rect: element.getBoundingClientRect() }));
+      const overlaps = [];
+      for (let left = 0; left < controls.length; left += 1) {
+        for (let right = left + 1; right < controls.length; right += 1) {
+          const a = controls[left].rect;
+          const b = controls[right].rect;
+          if (a.left < b.right && b.left < a.right && a.top < b.bottom && b.top < a.bottom) {
+            overlaps.push([controls[left].element.getAttribute("aria-label") || controls[left].element.textContent.trim(),
+              controls[right].element.getAttribute("aria-label") || controls[right].element.textContent.trim()]);
+          }
+        }
+      }
+      return overlaps;
+    })(),
   }));
   const violations = await new AxeBuilder({ page })
     .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
@@ -160,6 +177,20 @@ async function runFunctionalFlows(browser) {
   record("trace matches result", (await sim.locator(".trace-summary").textContent()).includes("0101 + 0011 = 1000"),
     await sim.locator(".trace-summary").textContent());
 
+  await sim.locator("[data-component='selector']").click();
+  record("circuit selector updates operation", await operation.inputValue() === "AND" &&
+    (await output.textContent()).trim() === "0001" &&
+    (await sim.locator(".circuit-inspection h3").textContent()).trim() === "Operation selector",
+  "Clicking the circuit selector changes ADD to AND and recomputes the result");
+  const selector = sim.locator("[data-component='selector']");
+  await selector.focus();
+  await page.keyboard.press("Enter");
+  record("keyboard circuit selector preserves focus", await operation.inputValue() === "OR" &&
+    (await output.textContent()).trim() === "0111" &&
+    await sim.locator("[data-component='selector']").evaluate((element) => element === document.activeElement),
+  "Enter changes AND to OR, recalculates, and keeps focus on the replacement selector");
+
+  await operation.selectOption("ADD");
   await inputA.fill("15");
   await inputB.fill("1");
   record("carry-out overflow", (await output.textContent()).trim() === "0000" &&
@@ -487,6 +518,8 @@ async function main() {
             result.layout.revealedSections === result.layout.totalRevealSections,
             `revealed=${result.layout.revealedSections}/${result.layout.totalRevealSections}`);
         }
+          gate("G13", `${route.path} interactive controls do not overlap at ${viewport.width}px`,
+            result.layout.overlappingControls.length === 0, JSON.stringify(result.layout.overlappingControls));
         await page.close();
         await context.close();
       }

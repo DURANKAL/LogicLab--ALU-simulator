@@ -1010,6 +1010,14 @@ input {
   stroke-width: 2;
 }
 
+.circuit-operation-selector:hover rect {
+  fill: var(--color-signal);
+}
+
+.circuit-operation-selector:hover text {
+  fill: var(--color-ink);
+}
+
 .circuit-component:focus-visible {
   outline: none;
 }
