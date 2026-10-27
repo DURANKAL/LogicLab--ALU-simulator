@@ -1343,16 +1343,21 @@ input {
 }
 
 .simulator-circuit .circuit-row {
-  transition: opacity var(--duration-base) var(--ease-out);
+  transition: opacity 520ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .simulator-circuit svg[data-walkthrough-active="true"] .circuit-row {
-  opacity: 0.22;
+  opacity: 0.16;
+}
+
+.simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="waiting"],
+.simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="upcoming"] {
+  opacity: 0.12;
 }
 
 .simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="inputs"],
 .simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="revealed"] {
-  opacity: 0.7;
+  opacity: 0.68;
 }
 
 .simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="active"] {
@@ -1362,13 +1367,31 @@ input {
 .simulator-circuit svg[data-walkthrough-active="true"] .circuit-wire {
   stroke-dasharray: 1;
   stroke-dashoffset: 1;
-  transition: stroke-dashoffset var(--duration-slow) var(--ease-out), stroke var(--duration-fast) var(--ease-out);
+  transition:
+    stroke-dashoffset 760ms cubic-bezier(0.22, 1, 0.36, 1),
+    stroke 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="waiting"] .circuit-wire,
+.simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="upcoming"] .circuit-wire {
+  stroke-dashoffset: 1;
 }
 
 .simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="inputs"] .circuit-wire-input,
 .simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="active"] .circuit-wire,
 .simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="revealed"] .circuit-wire {
   stroke-dashoffset: 0;
+}
+
+.simulator-circuit .circuit-component rect {
+  transition:
+    fill 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    stroke 420ms cubic-bezier(0.22, 1, 0.36, 1),
+    stroke-width 420ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.simulator-circuit .circuit-component text {
+  transition: fill 420ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .simulator-circuit svg[data-walkthrough-active="true"] .circuit-row[data-guide-state="active"] .circuit-component rect,

@@ -193,19 +193,21 @@ function mountWalkthrough(root) {
   let frameId = 0;
   let lastFrameTime = 0;
   let lastProgressUpdate = 0;
+  let copyAnimation = null;
+  let lastCopy = "";
 
   function updateCircuit() {
     const svg = root.querySelector(".simulator-circuit svg");
     if (!svg) return;
-    svg.dataset.walkthroughActive = String(active && result !== null);
+    svg.dataset.walkthroughActive = String(result !== null);
     const currentBitPosition = step >= 2 && step < WALKTHROUGH_STEP_COUNT - 1
       ? WALKTHROUGH_STEP_COUNT - 2 - step
       : null;
     for (const row of svg.querySelectorAll(".circuit-row")) {
       row.removeAttribute("data-guide-state");
-      if (!active) continue;
       const position = Number(row.dataset.bitPosition);
-      if (step === 0) row.dataset.guideState = "inputs";
+      if (!active) row.dataset.guideState = "waiting";
+      else if (step === 0) row.dataset.guideState = "inputs";
       else if (step === 1) row.dataset.guideState = "operation";
       else if (step === WALKTHROUGH_STEP_COUNT - 1 || position > currentBitPosition) {
         row.dataset.guideState = "revealed";
@@ -232,10 +234,22 @@ function mountWalkthrough(root) {
           title: "Valid inputs are needed",
           description: "Correct both inputs to run the guided circuit walkthrough.",
         };
+    const copyKey = `${copy.title}|${copy.description}`;
     const currentStep = String(step + 1).padStart(2, "0");
     indexLabel.textContent = `STEP ${currentStep} / ${String(WALKTHROUGH_STEP_COUNT).padStart(2, "0")}`;
     title.textContent = copy.title;
     description.textContent = copy.description;
+    if (active && copyKey !== lastCopy && !matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      copyAnimation?.cancel();
+      copyAnimation = root.querySelector(".walkthrough-step").animate(
+        [
+          { opacity: 0.65, transform: "translateY(0.35rem)" },
+          { opacity: 1, transform: "translateY(0)" },
+        ],
+        { duration: 420, easing: "cubic-bezier(0.22, 1, 0.36, 1)" },
+      );
+    }
+    lastCopy = copyKey;
     range.setAttribute("aria-valuetext", `Step ${step + 1} of ${WALKTHROUGH_STEP_COUNT}: ${copy.title}`);
     updateProgress();
     stateLabel.textContent = !result ? "WAITING FOR INPUT" : playing ? "PLAYING" : active ? "PAUSED" : "READY";
